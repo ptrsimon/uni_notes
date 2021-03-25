@@ -1,5 +1,4 @@
 % Második előadás
-% FIXME: statikus vs dinamikus kezelés
 
 \chapter{Függőségek}
 
@@ -182,6 +181,7 @@ egy ciklusban az előző iterációban kiszámolt adatot használunk fel, péld�
 
 \section{Vezérlés függőségek}
 Elágazások esetén léphetnek fel. Itt a statikus és dinamikus kezelésnek eltérő jelentése van, mint az adatfüggőségeknél. A statikus kezelés itt egy állandó, mindig alkalmazható eljárást jelent, míg a dinamikus kezelés az adott programtól függ.
+\subsection{Feltétlen ugrásnál}
 \paragraph{Probléma felvetés:} az alábbi utasítássorozatban a feltétlen ugrás (JMP) egy SHL utasításra mutat:
 \begin{lstlisting}[language=Ant]
     DIV
@@ -236,3 +236,72 @@ Mire az ADD utasításhoz elérnénk, felülíródik a PC és a megfelelő utas�
 A módszer hátránya, hogy hatékonysága a futószalag fokozatok számának növelésével rohamosan csökken.
 \paragraph{Kezelés NOP utasításokkal (statikus):} a JMP utasítás mögé egy vagy több NOP utasítás kerül be.
 Ez a futószalag várakoztatását jelenti, amíg elő nem áll az ugráshoz szükséges PC. Ez az ún. ugrási buborék, nagysága $n-1$, ahol $n$ a futószalag fokozatok száma.
+\subsection{Feltételes elágazásnál}
+Kezelése csak dinamikusan, a végrehajtás során történik (spekulatív elágazáskezelés - branch prediction).
+A feltételtől függ az, hogy ugrás vagy soros folytatás következik.
+
+\section{Erőforrás függőségek}
+Akkor lép fel, ha több utasítás ugyanazt az erőforrást használná.
+Ilyenkor várakoztatni kell az egyiket.
+Erőforrások lehetnek például regiszterek, pufferek, végrehajtó egységek, stb.
+\paragraph{Példa:} a logikai futószalagok különböző célokra dedikált végrehajtó egységekben vannak megvalósítva.
+Ilyen pl. a lebegőpontos vagy a fixpontos végrehajtó egység.
+Ha sok olyan utasítás van, ami lebegőpontos végrehajtást igényel, előfordulhat, hogy a lebegőpontos végrehajtó egységnél sorban állnak az utasítások, míg a fixpontos kihasználatlanul várakozik.
+\paragraph{Megoldás:} úgy kell tervezni a processzort, hogy ez ne okozzon szűk keresztmetszetet. Ezt az erőforrások többszörözésével érhetjük el.
+Fontos szempont a hatékonyság, 70-80\%-os kihasználtság az általános.
+A mai processzorokban magonként kb. 6 végrehajtó egység van.
+
+\section{Szekvenciális (soros) konzisztencia megőrzése}
+\subsection{Soros konzisztencia típusai}
+\begin{itemize}
+    \item utasítás feldolgozás soros konzisztenciája
+    \begin{itemize}
+        \item utasítás végrehajtás soros konzisztenciája (processzor konzisztencia)
+        \item memória hozzáférés soros konzisztenciája (memória konzisztencia)
+    \end{itemize}
+    \item kivételkezelés soros konzisztenciája
+    \begin{itemize}
+        \item pontatlan kivételkezelés
+        \item pontos kivételkezelés
+    \end{itemize}
+\end{itemize}
+
+\subsection{Processzor konzisztencia}
+\paragraph{Probléma felvetés:} párhuzamos végrehajtás esetén az alábbi assembly kódban előfordulhat, hogy az ADD utasítás hamarabb lefut, mint a DIV.
+\begin{lstlisting}[language=Ant]
+    ;I1
+    DIV r3, r2, r1
+    ;I2
+    ADD r5, r6, r7
+    ;I3
+    JZ cimke
+\end{lstlisting}
+Mivel a JZ utasítás mindig a legutoljára végzett utasítás eredményét használja fel a feltételes ugrás eldöntéséhez,
+ha I\textsubscript{1} később végez, mint I\textsubscript{2}, JZ a DIV eredménye alapján fog ugrani, ami hibás működéshez vezethet.
+\paragraph{Megoldás:} a hardvert úgy kell tervezni, hogy ilyen hiba ne fordulhasson elő.
+
+\subsection{Pontatlan kivételkezelés (gyenge konzisztencia)}
+\paragraph{Probléma felvetés:} tegyük fel az alábbi kódrészletben, hogy az ADD túlcsordul, de a MUL még nem végzett.
+\begin{lstlisting}[language=Ant]
+    ;I1
+    MUL r3, r2, r1
+    ;I2
+    ADD r5, r6, r7 ;tulcsordul -> INT
+    ;I3
+    JZ cimke
+\end{lstlisting}
+Az ADD utasítás túlcsordulása miatt megszakítást kell kezelnünk, ilyenkor a processzor a regiszterek állapotát (program kontextust) elmenti egy verem regiszterbe.
+Miután a kivételt lekezeltük, a veremből visszatöltődik a kontextus és folytatódik a végrehajtás.
+Ebben az esetben viszont nem fogjuk tudni, hogy a MUL utasítás végzett-e már, így az r\textsubscript{3} regiszter definiálatlan állapotba kerül.
+Ez hibákhoz vezethet.
+\paragraph{Megoldás:} a korai szuperskalár architektúráknál (első Pentium CPU-k) megoldatlan volt a probléma, pl. kék halált is okozhatott.
+A probléma megoldása a pontos kivételkezelés.
+
+\subsection{Pontos kivételkezelés (erős konzisztencia)}
+Minden mai CPU a megszakítás kéréseket csak az utasítások eredeti sorrendjében fogadja el.
+Az előző példában a processzor csak akkor fogadja el a megszakítás kérést, ha a MUL utasítás végzett.
+Megvalósítása történhet
+\begin{itemize}
+    \item átrendező puffer segítségével (pl. Intelnél ROB - ReOrder Buffer) vagy
+    \item címkézéssel.
+\end{itemize}
