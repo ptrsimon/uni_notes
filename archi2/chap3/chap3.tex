@@ -141,7 +141,7 @@ Hardveres szempontból az univerzális futószalag előnytelen, mivel sok tranzi
 Ezért általában a \ref{logikai_futoszalag}. részben leírt dedikált (egy adott funciót ellátó) futószalagokat építenek a processzorokba.
 Az eredmény kevesebb logikai kapu, így gyorsul a végrehajtás (a bemenettől a kimenetig gyorsabban átérnek az elektronok).
 \paragraph{Megjegyzés:} a futószalag sebességét általában a leglassabb fokozat sebessége határozza meg, tehát a tervezési cél a megközelítőleg azonos sebességű fokozatok létrehozása.
-\paragraph{Kialakítás:} a fokozatok előtt előválasztó (puffer) regiszterek vannak. Ezek a felhasználó számára láthatatlanok, az adat először ezekbe töltődik be.
+\paragraph{Fokozatok kialakítása:} a fokozatok előtt előválasztó (puffer) regiszterek vannak. Ezek a felhasználó számára láthatatlanok, az adat először ezekbe töltődik be.
 Ezekből a regiszterekből kerül aztán a végrehajtó egységbe az adat, majd az utasítás elvégzése után szintén puffer regiszterekbe kerül a kimenet.
 A puffer regiszterek szükségesek, mivel a gyakorlatban egy fokozat nem mindig végez egy óraciklus alatt.
 Az ebből adódó várakozás során ezekben a regiszterekben tárolódik az adat.
@@ -158,20 +158,21 @@ Ennek a kialakítása látható a \ref{fig:fokozat}. ábrán. A későbbiekben a
     \caption{A végrehajtó egységek párhuzamosítása}
     \label{fig:fokozat_parhuzamos}
 \end{figure}
-\paragraph{Példa - PowerPC 604:} a PowerPC 604-es processzorban egymással párhuzamosan több dedikált futószalag is működött (\ref{fig:powerpc604} ábra).
+\subsection{Példa: a PowerPC 604}
+A PowerPC 604-es processzorban egymással párhuzamosan több dedikált futószalag is működött (\ref{fig:powerpc604} ábra).
 A fetch és decode fokozatok minden óraciklusra lehívtak egy utasítást, és a megfelelő futószalagba töltötték.
 Így a CPU képes volt egymással párhuzamosan több utasítást is végrehajtani (akár 4-et is).
 Mivel előfordulhatott, hogy a később lehívott és betöltött utasítás végzett hamarabb (pl. elsőként egy FP, másodikként egy FX utasítás $\rightarrow$ FX hamarabb végez), szükséges volt egy konzisztencia fokozat (CO) bevezetése.
 Az utasítások címkézésre kerültek, a sorrendet a CO biztosította.
 A párhuzamosság miatt szükség volt a fokozatok közötti várakoztatásra, ez az interlock funkció.
+\paragraph{Megjegyzés:} az Intel 80486 és az első Pentium csak 2 utasítás futószalaggal rendelkezett. A mai Core i architectúrák magonkánt általában 6-8 futószalagot alkalmaznak.
 \label{powerpc604}
-\begin{figure}[h]
+\begin{figure}[H]
     \includegraphics[width=0.6\textwidth]{powerpc604}
     \centering
     \caption{A PowerPC 604 futószalagja}
     \label{fig:powerpc604}
 \end{figure}
-\paragraph{Megjegyzés:} az Intel 80486 és az első Pentium csak 2 utasítás futószalaggal rendelkezett. A mai Core i architectúrák magonkánt általában 6-8 futószalagot alkalmaznak.
 
 \section{RISC és CISC architektúrák}
 Az utasításkészlet (tervezési stratégia) alapján kétféle architektúrát különböztetünk meg:
