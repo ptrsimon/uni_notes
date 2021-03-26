@@ -40,7 +40,6 @@ A processzor CISC (Complex Instruction Set Computing) architektúrájú, azaz eg
     \item 14-15. fokozat: exception + multitask handling (FT\textsubscript{1} - Fault Tolerant 1, FT\textsubscript{2} - Fault Tolerant 2)
     \item 16. fokozat: commit, ez a visszaírás (W/B vagy DC\textsubscript{1})
 \end{itemize}
-
 \paragraph{Következmény:} ez egy tisztán futószalag elvű processzor, ami teljesítményben visszalépést jelentett a korábbi architektúrákhoz képest.
 Előnye az alacsony fogyasztás, ezért főleg mobil eszközökbe használták az Atom CPU-kat.
 
@@ -158,6 +157,7 @@ Ennek a kialakítása látható a \ref{fig:fokozat}. ábrán. A későbbiekben a
     \caption{A végrehajtó egységek párhuzamosítása}
     \label{fig:fokozat_parhuzamos}
 \end{figure}
+
 \subsection{Példa: a PowerPC 604}
 A PowerPC 604-es processzorban egymással párhuzamosan több dedikált futószalag is működött (\ref{fig:powerpc604} ábra).
 A fetch és decode fokozatok minden óraciklusra lehívtak egy utasítást, és a megfelelő futószalagba töltötték.
@@ -185,6 +185,7 @@ Mindkettő használatban van napjainkban.
 Az első CPU-k kevés utasítással rendelkeztek (RISC), majd a 70-es években az egyre több funkció és bonyolultabb utasítások miatt ez a szám növekedett (CISC).
 A 80-as években rájöttek, hogy a sok utasítás ugyan megkönnyíti a programozást, de a címzés bonyolultsága miatt káros hatással van a teljesítményre.
 Ez vezetett a RISC architektúrák újbóli megjelenéséhez.
+
 \subsection{RISC}
 \paragraph{Példa:} a mobil eszközök ARM (Advanced RISC Machine) processzorai RISC architektúrájúak.
 \paragraph{Tulajdonságai:}
@@ -203,6 +204,7 @@ Ez vezetett a RISC architektúrák újbóli megjelenéséhez.
 \paragraph{Előnye:} általában gyorsabb végrehajtás a CISC architektúrákhoz képest.
 \paragraph{Hátránya:} a bonyolultabb feladatokat instrukció szekvenciákkal kell megoldani.
 Ez a fordításnál okoz problémát, növelheti a program méretét.
+
 \subsection{CISC}
 \paragraph{Példa:} a 80-as években elterjedt Intel 80386-os egy tisztán CISC architektúra.
 \paragraph{Tulajdonságai:}
@@ -232,3 +234,43 @@ Ez a megoldás minden mai (Core i) architektúrában megjelenik.
 
 \subsection{Hibrid RISC}
 A mai ARM processzorok sem tisztán RISC architektúrák, hanem CISC jellegű utasításokkal vannak kibővítve (pl. az ARM Thumb, ami egy tömörített utasításkészlet).
+
+\section{Következmények}
+A futószalagos feldolgozás következményei:
+\begin{itemize}
+    \item Jelentősen felgyorsult az utasítások lehívása és az operandusok betöltése.
+    \item Amíg a processzorok feldolgozási sebessége jelentősen nőtt, a memória sebessége kevésbé (ez a jelenség a sebességolló) $\rightarrow$ cache bevezetése (IBM - 1968, Intel - 80-as évek). A cache előnye, hogy a gyakran használt operandusok gyorsan elérhetők.
+    \item Maximális végrehajtási sebesség: 1 utasítás / ciklus (további növekedés kibocsájtási párhuzamossággal vagy utasításon belüli párhuzamossággal lehetséges).
+    \item A vezérlés átadási utasítások kifinomult technikája szükséges (függőségek miatt).
+    \item Az elágazás kezelés bonyolódik.
+\end{itemize}
+
+\subsection{Elágazások kezelése}
+\subsubsection{Korai RISC gépek}
+Kezelés ugrási buborékkal.
+\subsubsection{Korai CISC gépek}
+A dekódoló fokozatba építették a címszámító és a logikai komparáló egységet, így a dekódolási ciklus végére előáll az ugrási cím.
+\subsubsection{Későbbi CISC gépek (futószalag CPU-k és első generációs szuperskalár architektúrák)}
+Kezelés fix előrejelzéssel, pl. mindig ugrik.
+Ezzel a megoldással az ugrási cím előre kiszámításra kerül és megkezdődik az ugrási címen lévő utasítások lehívása.
+Ha mégse kell ugrani, az utasításokat visszatörli és az eredeti helyen folytatódik a végrehajtás.
+Előnye, hogy kiküszübölte az ugrási buborékot, növekszik a teljesítmény.
+Korlátja, hogy ha nagy látenciával rendelkező műveletet kellett végrehajtani az ugrási feltételben, az blokkolta a kibocsájtást.
+Ilyen megoldást használ például az Intel 80486-os CPU.
+\subsubsection{Második generációs szuperskalár architektúrák}
+A CPU a dekódolási folyamatok egy részét már akkor elvégzi, amikor az utasításokat az L1 cache-be írja.
+Az előre elvégzett feladatok:
+\begin{itemize}
+    \item utasítás típusazonosítás
+    \item ugrások felismerése
+    \item utasításhossz meghatározása (szükséges, mivel CISC-nél változó az utasításhossz)
+    \item spekulatív elágazásbecslés
+    \begin{itemize}
+        \item regiszterátnevezéssel
+        \item átrendező puffer (Intel: ROB - ReOrder Buffer)
+    \end{itemize}
+\end{itemize}
+
+\section{Összegzés}
+A fejezetben felsorolt módszerekkel elérték a futószalag elvű processzorok teljesítményének korlátait.
+A további gyorsítás érdekében párhuzamos kibocsájtást kellett alkalmazni, így jöttek létre a szuperskalár processzorok.
