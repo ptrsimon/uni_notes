@@ -118,7 +118,7 @@ Ennek látható az általános adatútja a \ref{fig:lehivas_elorehozas} ábrán,
     \label{fig:lehivas_elorehozas}
 \end{figure}
 
-\subsection{WAR - Write After Read}
+\subsection{WAR - Write After Read} \label{war}
 
 \paragraph{Probléma felvetés:} egy MUL utasítást egy ADD követ az alábbi módon:
 \begin{lstlisting}[language=Ant]
@@ -154,7 +154,7 @@ Az átmeneti (átnevezési) regiszterek tulajdonságai:
     \item átnevezési: a vezérlés használja az álfüggőségek feloldására.
 \end{itemize}
 
-\subsection{WAW - Write After Write}
+\subsection{WAW - Write After Write} \label{waw}
 \paragraph{Probléma felvetés:} egy MUL utasítást egy ADD követ az alábbi módon:
 \begin{lstlisting}[language=Ant]
     ;I1
