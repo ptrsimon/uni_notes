@@ -330,3 +330,154 @@ A ROB-ot folyamatosan frissíteni kell a függőségek mielőbbi feloldása érd
 Amikor egy eredmény előáll, a processzor asszociatív keresést végez (regiszterazonosító alapján), hogy a várakozó utasítások között van-e olyan, aminek operandusa a most előállt eredményt igényli.
 Ha talál ilyet, az eredményt betölti a regiszterazonosító helyére és az állapot bitet 1-re állítja.
 Ha mindkét forrás operandus állapot bite 1 lesz, a ROB kiküldi az utasítást a végrehajtó egységek felé.
+\subsubsection{Szemléletése}
+A működése egy kör alakú puffer segítségével ábrázolható (\ref{fig:rob}. ábra).
+A várakoztató állomás a bemeneti és a végmutató között látható puffer regiszterekből áll.
+Itt sorakoznak az i\textsubscript{n}-el jelölt utasítások.
+Az utasítások a bemeneti mutatónál töltődnek be, a ROB elvégzi a regiszterátnevezéseket és beírja a forrás operandusokat, majd később az eredményt is az átnevezési regiszterekbe.
+A bemeneti és végmutató között bármelyik független utasítás kiküldhető a végrehajtó egységek felé.
+Ha egy utasítás végrehajtásra került, a bemeneti és a végmutató is egyel elmozdul, az ábrán az óramutatú járásával ellentétesen.
+Ekkor már az i\textsubscript{x+n+1}-edik utasítás is része lesz a várakoztató tárnak.
+\begin{figure}[h]
+    \includegraphics[width=0.4\textwidth]{rob}
+    \centering
+    \caption{A reorder buffer szemléltetése}
+    \label{fig:rob}
+\end{figure}
+\subsubsection{Az utasítások sorrendisége}
+Tegyük fel, hogy az ábrán látható utasítások közül i\textsubscript{x+1} és i\textsubscript{x+2} független utasítások és már megtörtént a végrehajtásuk, viszont i\textsubscript{x} függő utasítás és még nem történt meg a végrehajtása.
+Ekkor az utasítások sorrendiségének biztosíítása érdekében i\textsubscript{x+1} és i\textsubscript{x+2} eredményei még nem írhatók ki a célregiszterekbe, azzal meg kell várniuk i\textsubscript{x} befejeződését, így a pufferregiszterek sem szabadulhatnak fel addig.
+Ezzel látszólag i\textsubscript{x} végrehajtása ugyanúgy blokkoló hatású, viszont a teljesítmény mégis jelentősen növekszik, hiszen i\textsubscript{x} végrehajtásakor i\textsubscript{x+1} és i\textsubscript{x+2} eredményei már készen állnak, így csak ki kell írni őket.
+Míg a végrehajtás akár 9-10 óraciklust is igénybe vehet, kiíráskor egy óraciklus alatt akár 5-6 utasítás eredménye is kiírható, ezáltal jelentős teljesítménynövekedést érünk el.
+\subsubsection{Spekulatív bit}
+A ROB minden utasításhoz rendel egy spekulatív bitet.
+Azoknál az utasításoknál, amiknél még nem biztos a végrehajtás szükségessége (olyan elágazás részei, ahol a feltétel még nem került kiértékelésre), a spekulatív bit értékét 1-re állítja a ROB.
+Amíg a spekulatív állapot fennáll, az eredmény nem írható ki, így biztosítva az utasítások sorrendiségét.
+Ha az ugrási feltétel kiértékelésre került, két eset lehetséges.
+Egyik, ha a kérdéses utasítást végre kell hajtani: ekkor a spekulatív bit 0-ra változik, az eredmény kiírásra kerül, a végmutató pedig elmozdul.
+Mésik esetben, ha mégse kell végrehajtani az utasítást, az utasítás törlésre kerül a ROB-ból, az átnevezési (piszokzat) regiszter értéke felszabadításra kerül, a végmutató elmozdul, a helyes irányba történő utasítás pedig lehívásra kerül.
+\subsubsection{Rekonverzió (RISC $\rightarrow$ CISC)}
+Mivel egy CISC utasítás több RISC utasítássá konvertálódik a végrehajtásra, de a rendszer kívülről CISC architektúrájú, az egy CISC utasításhoz tartozó RISC utasítások eredményei csak akkor írhatók ki, ha már mindegyiknek előállt az eredménye.
+Így az eredmények egyszerre kerülnek kiírásra és megtörténhet a rekonverzió.
+
+\section{Harmadik generációs szuperskalárok}
+A második generációs szuperskalárok a fent említett módszerekkel elérték az architektúra teljesítménybeli korlátait, így más irányba kellett fejleszteni.
+Így jelent meg 1997 környékén az utasítás szintű párhuzamosság, amivel elérkeztek a harmadik generációs szuperskalár CPU-k.
+Egyesek szerint nincs haramadik generáció, hanem ez csak a második generáció kibővítése multimédiás/3D képességekkel.
+
+\subsection{Utasításon belüli párhuzamosság típusai}
+\begin{itemize}
+    \item Duál műveleti utasítások (pl. multiply-add: $y=ax+b$. Elsősorban numerikus feldolgozást segíti, általános alkalmazásoknál ritka).
+    \item SIMD utasítások (Single Instruction Multiple Datastream - több operanduson ugyanazon utasítás elvégzése. Ilyen pl. az Intel MMX PADDW utasítása, ami 4 fixpontos összeadást végez el egy utasítás alatt).
+    \item VLIW architektúrák
+\end{itemize}
+
+\subsection{SIMD jellemzői}
+\begin{itemize}
+    \item A SIMD utasítások egy kibővített utasításkészletet alkotnak (multimédiás utasításokkal).
+    \item A logikai architektúra kibővítését igényli.
+    \item 8 bemenő operandus szükséges $\rightarrow$ sokszorosára nő a memóriaigény.
+    \item A növekvő memória sávszélesség miatt az L2 cache közös lapkára kerül a CPU-val (ez korábban, pl. a Pentium II-nél külön foglalatba került, ez volt a slot 1).
+    \item A gyorsabb megjelenítés érdekében a buszrendszer is bővült (pl. AGP - Advanced Graphics Port, PCI express).
+    \item 3D alkalmazásokat, játékokat tett lehetővé.
+    \item Először az Intel Pentium processzorban (1997) jelent meg MMX (MultiMedia eXtensions) néven, ami egyelőre csak fixpontos multimédiás utasításokat támogatott.
+    \item Az MMX technológia kibővítésre került a Pentium III processzorban (1999), SSE (Streaming SIMD Extensions) néven, ami már lebegőpontos utasításokat is tartalmazott.
+    \item A processzor általános teljesítménye nem nőtt jelentősen a SIMD bevezetésével, viszont a multimédiás alkalmazásokat (kép, videó, 3D játék) jelentősen meggyorsította, mivel ezeknél nagy mennyiségű, függőség nélküli adattal kell dolgozni.
+\end{itemize}
+
+\subsection{Fixpontos SIMD feldolgozás}
+A fixpontos SIMD utasítások elsősorban a hang, és a pixeles megjelenítést használó multimédiás alkalmazásokat gyorsítják.
+Egy utasításban 2-8 operandus lehetséges.
+(A lebegőpontos SIMD utasítások a vektoros és 3D alkalmazásokat gyorsítják, utasításonként 2-4 operandussal rendelkeznek.)
+\subsubsection{Hangfeldolgozás}
+A hangot a feldolgozásához először digitalizálni kell.
+Ezt az analóg jelből történő, meghatározott időközönkénti mintavételezéssel érhetjük el.
+Ebben a formában már tárolható és visszajátszható.
+A minőséget befolyásolja a mintavételezés sűrűsége (felbontás), ennek növelése jobb minőséget, de nagyobb erőforrásigényt jelent.
+Példa: 50 kHZ-es mintavételezés $\rightarrow$ 50 ezer minta másodpercenként (kb. DVD minőség).
+A hangfeldolgozás másik jellemzője, hogy egy adott mintát hány biten tárolunk (minta nagysága).
+8 bit esetén 256 féle hangmagasságot tudunk tárolni.
+A cél, hogy minnél jobban hasonlítson a digitális jel az eredeti, analóg függvényhez.
+\subsubsection{Hang tömörítése}
+Ebben az időben még nem állt rendelkezésre annyi tároló kapacitás, hogy jó minőségű jeleket lehessen tárolni, ezért született meg a tömörítés.
+A különböző tömörítési formátumok (AVI, MP3) használatával nagyrészt minőség romlás nélkül tudták csökkenteni az adatok mennyiségét.
+A SIMD utasítások segítségével ezeket a tömörített formátumokat valós időben lehet lejátszani.
+\subsubsection{Képfeldolgozás}
+A képek esetén képpontokat tárolunk el, minden képponthoz hozzá kell rendelni a színét és a fényességét.
+A színek három értékből állnak össze: piros, zöld és kék.
+A színek előállításához használjuk a színfordítási táblázatot, amiben minden színhez egy számérték van hozzárendelve.
+Ez alapján áll elő a színskála kódolása.
+Kezdetben 1 biten tárolták az értékeket (világos/sötét), aztán a színes kijelzők megjelenésével ez 8, később 16 (hicolor), végül 24 (truecolor) bitre bővült.
+A 32 bites színskálán 24 biten ábrázolják a színeket, a többi 8 bit pedig az alfa csatorna, ami az effekteket tárolja (pl. átlátszósági mutató).
+\subsubsection{Probléma}
+A hang és kép feldolgozása során tehát a problémát a nagy mennyiségű adat tárolása és feldolgozása okozza.
+\subsubsection{Megoldás}
+\begin{itemize}
+    \item Kezdetben célhardverrel, multimédiás kártyákkal.
+    \item Később a CPU multimédiás bővítésével.
+\end{itemize}
+\subsubsection{Bit-blokk átvitel és pakolt adattípusok}
+A multimédiás megjelenítés tipikus művelete a bit-blokk átvitel.
+Lényege, hogy minden megnyitott ablakot egy bit-blokkként kezelünk, így nem egyesével dolgozunk az operandusokkal.
+Ez szükséges, mivel például egy 1920x1080-as kijelző 24 bites színskála esetén kb. 6 MB adatot jelent, ami azt jelenti, hogy 30 FPS megjelenítés esetén 180 MB/sec feldolgozási sebességre lenne szükség.
+Ez a sebesség még ma is soknak számít, ezért a megoldására egyrészt tömörítést alkalmaztak, másrészt pedig architekturális megoldást vezettek be.
+Az architekturális megoldás egy új fixpontos adattípus bevezetése, a pakolt adattípus.
+A pakolt adattípus az Intel MMX processzorokban jelent meg először, típusai:
+\begin{itemize}
+    \item pakolt byte (8 bit hossz * 8 db = 64 bit)
+    \item pakolt félszó (16 bit hossz * 4 db = 64 bit)
+    \item pakolt szó (32 bit hossz * 2 db = 64 bit)
+\end{itemize}
+A SIMD utasításoknak köszönhetően ezeket az adattípusokat egy utasítás alatt össze tudták adni az Intel MMX CPU-k.
+Ezek az új utasítások a következőek:
+\begin{itemize}
+    \item 4 alapművelet
+    \item logikai műveletek mindhárom pakolt adattípusra
+\end{itemize}
+A multimédiás alkalmazások nagyrészt az internet elterjedése miatt lettek szükségesek.
+\subsubsection{Fizikai architektúra}
+A pakolt adattípusok feldolgozásához az architektúra fizikai módosítására is szükség volt:
+\begin{itemize}
+    \item 64 bites regiszterek (új regiszterek helyett a lebegőpontos regiszterek használata, amik 80 bitesek voltak, így megfeleltek a 64 bit tárolására)
+    \item 64 bites buszrendszer (először belső, majd külső buszok is)
+    \item Pentium II-es processzorban már két MMX futószalag került beépítésre, ami tényleges gyorsítást jelentett a függőségek hiánya miatt
+\end{itemize}
+
+\subsection{Lebegőpontos SIMD feldolgozás}
+A lebegőpontos SIMD utasítások a vektoros képfeldolgozást segítik, aminek használatával a feldolgozandó adat mennyisége csökkenthető.
+\subsubsection{Vektoros képfeldolgozás}
+Egyenesekkel vagy görbékkel határolt obejktumok geometriai jellemzőkkel leírhatók.
+Példa: egy egyenes ábrázolása Full HD kijelzőn keresztben 1920 képpontot jelent fixpontosan, ennyi adatot is kell tárolnunk.
+Vektorosan azonban elég a két végpontot eltárolni, ami lényegesen kevesebb adatot jelent.
+Kör esetében elégséges a középpont és a sugár tárolása.
+A módszer eredménye, hogy jóval kevesebb adatot kell tárolnunk, viszont a megjelenítéshez sokkal többet kell számolni.
+Képek tárolása is lehetséges így, ha azokat geometriai alakzatokra bontjuk fel, majd ezeknek az adatait tároljuk.
+Az első 3D játékok is ilyen elven működtek.
+Előnye, hogy a képek könnyen mozgathatók, kicsinyíthetők és nagyíthatók.
+A lebegőpontos ábrázolás szükséges, mivel a geometriai műveletek során törtekkel is kell számolni.
+Hátránya, hogy 2D ábrázolásnál az éles határok miatt kevésbé hasonlít a valóságra, ennek kiküszöbölésére textúrákat alkalmaznak.
+\subsubsection{3 dimenziós ábrázolás}
+3D ábrázolásnál értelmezni kell egy harmadik dimenziót a 2D-s képen.
+Az élethű megjelenítéshez biztosítani kell, hogy a párhuzamosok a végtelenben összetartanak, hogy a közelebbi obejktumok nagyobbnak hassanak, valamint az atmoszférikus hatást (a távolabbi obejktumok halványabbak és kékesebbek).
+A 3D-s filmeknél minimum 15-30 FPS-t kell előállítani.
+Ehhez kb. 500 000 objektum megjelenítése szükséges másodpercenként $\rightarrow$ nagy mennyiségű lebegőpontos adat feldolgozására van szükség.
+\subsubsection{Példa - az Intel Pentium III}
+Ilyen lebegőpontos feldolgozásra először az Intel Pentium III-as processzora volt képes, az SSE kiterjesztéssel.
+A CPU 500 MHz-en működött és nagyjából 2 GFLOPS/sec számítási kapacitással bírt.
+Ez azt jelenti, hogy másodpercenként 2 milliárd lebegőpontos műveletet tudott végrehajtani.
+A mai processzorok kb. 12-20 GFLOPS/sec teljesítményt biztosítanak.
+\subsubsection{Logikai architektúra}
+Logikai oldalról nézve mindez egy új utasításkészletet jelentett, ez az SSE (ld. feljebb).
+Kb. 70 db új utasítást tartalmazott, amik a lebegőpontos pakolt adattípusokkal tudtak műveleteket végezni.
+Az adatok 128 bites pakolt típusok voltak:
+\begin{itemize}
+    \item 4 * 32 bit - egyszeres pontosság, vagy
+    \item 2 * 64 bit - kétszeres pontosság.
+\end{itemize}
+Ezek megfelelnek az IEEE 754-es szabványnak, ami a lebegőpontos számokra vonatkozik.
+\subsubsection{Fizikai architektúra}
+Itt már szükség volt ténylegesen új regiszterek létrehozására, így 8 db új 128 bites regiszter került a processzorokba.
+Ezek mentéséről és töltéséről az operációs rendszer vagy az adott szoftver gondoskodik.
+Az első szoftveres támogatás a Windows 98-ban jelent meg.
+Az új regiszterek bevezetésével 1985 óta először változtatta meg az Intel a processzorok regiszterkészletét.
+Következménye, hogy a megszakítás rendszert is át kellett tervezni, és ez az OS gyártójával való együttműködést igényelte.
