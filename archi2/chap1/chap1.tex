@@ -1,0 +1,69 @@
+% Első előadás
+
+\chapter{Bevezetés}
+
+\section{A tárgy célja}
+A tárgy célja a párhuzamos számítógép architektúrák ismertetése.
+
+\section{Történeti áttekintés}
+Az iparban először a Ford T-modell gyárása során alkalmazták a párhuzamos végrehajtást (futószalag).
+A számítástechnikában is hasonlóan működnek a párhuzamos architektúrák.
+Fő cél a fejlesztés során a feldolgozás gyorsítása, ezért a nagy számítógépeknél már a 60-as években megjelent a párhuzamos végrehajtás.
+A mikroszámítógépekben ugyanez a 80-as években történt meg.
+
+\section{A párhuzamosság csoportosítása}
+
+\subsection{Funkció szerint}
+\begin{itemize}
+    \item Rendelkezésre álló párhuzamosság (feladatokban rejlő párhuzamosítási lehetőségek).
+    \item Kihasználható párhuzamosság (valóban használható párhuzamosság).
+\end{itemize}
+
+\subsection{Típus szerint}
+\begin{itemize}
+    \item Adat párhuzamosság.
+    \item Funkcionális párhuzamosság.
+\end{itemize}
+
+\subsection{Elhelyezkedés szerint}
+\begin{itemize}
+    \item Időbeli párhuzamosság (futószalag): Ford T-modell gyártósor analógia szerint az egyik helyen fényeznek, másik helyen beszerelik a motort egyidőben.
+    \item Térbeli párhuzamosság (több, azonos típusú végrehajtó egység egyidejű működése): előző analógia szerint két helyen két különböző autót fényeznek egyszerre.
+\end{itemize}
+
+\section{Adat párhuzamosság}
+Hasznosítása kétféleképpen lehetséges:
+\begin{itemize}
+    \item Adatpárhuzamos architektúrákkal (adatelemeken párhuzamos, vagy futószalag elvű műveletek végrehajtása).
+    \item Funkcionális párhuzamossággá alakítással (adatelemeken történő műveletek ciklus formájában történő megfogalmazása).
+\end{itemize}
+
+\section{Funkcionális párhuzamosság}
+A funkcionális párhuzamosság a feladat logikájából következik.
+Az architektúrák, operációs rendszerek és a fordítóprogramok is igyekeznek kihasználni.
+
+\subsection{Szintjei}
+Különböző szinteken értelmezhetjük (alacsonytól magas felé haladva):
+\begin{itemize}
+    \item Utasítás szintű párhuzamosság (ILP - Instruction Level Parallelism): program utasítások párhuzamos végrehajtása.
+    \item Ciklus szintű párhuzamosság: egymást követő iterációk párhuzamos végrehajtása (függőségek akadályozhatják).
+    \item Eljárás szintű párhuzamosság: mértéke leginkább a feladat jellegétől függ.
+    \item Program szintű párhuzamosság: egymástól független programok párhuzamos végrehajtása.
+    \item Felhasználó szintű párhuzamosság: több, egymástól független felhasználó kiszolgálása (pl. szerverek, időosztásos rendszerek).
+\end{itemize}
+
+\subsection{Kihasználása}
+\subsubsection{Utasítás szintű párhuzamosság esetén}
+\begin{itemize}
+    \item Utasítás szinten párhuzamos architektúrákkal.
+    \item Erre a célra szolgáló compiler segítségével.
+\end{itemize}
+\subsubsection{Ciklus- és eljárás szintű párhuzamosság esetén}
+Szálak (folyamatok) segítségével.
+A szál vagy folyamat a tárgykód legkisebb önállóan végrehajtható része.
+Szálakat létrehozhat:
+\begin{itemize}
+    \item Programozó, párhuzamos nyelveket használva (fork, join...).
+    \item Operációs rendszer, ami támogatja a többszálas végrehajtást.
+    \item Párhuzamos fordítóprogram.
+\end{itemize}
