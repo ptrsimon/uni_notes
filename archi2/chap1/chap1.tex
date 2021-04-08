@@ -67,3 +67,114 @@ Szálakat létrehozhat:
     \item Operációs rendszer, ami támogatja a többszálas végrehajtást.
     \item Párhuzamos fordítóprogram.
 \end{itemize}
+\subsubsection{Szemcsézettségi szintek}
+A funkcionális párhuzamosság kihasználásához különböző szemcsézettségi szintek rendelhetők.
+A finom szemcsézettségtől a durváig haladva a párhuzamossági szintek:
+\begin{itemize}
+    \item utasításszint
+    \item szál szint
+    \item folyamat szint
+    \item felhasználói szint
+\end{itemize}
+A finom szemcsézettségű párhuzamosság alacsony szinten, közvetlenül kihasználható.
+A magasabb szintű (durvább szemcsézettségű) párhuzamosság kihasználásához nem elég a hardver és a compiler támogatása, hanem OS-ek alatti konkurens végrehajtás szükséges.
+
+\section{Compilerek}
+A compilerek a magas szintű nyelveken írt programokat fordítja le a processzor által értelmezhető kódra.
+
+\subsection{Feladatai}
+\begin{itemize}
+    \item analizálni a forrásnyelvű program karaktersorozatát,
+    \item szintetizálni (létrehozni) a tárgykódot.
+\end{itemize}
+
+\subsection{Analízis részei}
+\begin{itemize}
+    \item Lexikális elemzés (konstansok, változók, operátorok).
+    \item Szintaktikai elemzés.
+    \item Szemantikai elemzés.
+\end{itemize}
+\subsection{Szintézis részei}
+\begin{itemize}
+    \item Kódgenerálás (assembly kód vagy gépi kód).
+    \item Kód optimalizálás (pl. független részek keresése párhuzamos végrehajtáshoz).
+\end{itemize}
+
+\section{Párhuzamos architektúrák osztályozása}
+\subsection{Klasszikus modell}
+A klasszikus osztályozási modell J. Flynn amerikai mérnök nevéhez kötődik.
+Ez a rendszer a vezérlő és a feldolgozási egységek számán alapul.
+Az osztályozáshoz bevezetett új fogalmak:
+\begin{itemize}
+    \item SI (Single Instruction stream) - egyszeres utasításfolyam: az architektúra egy vezérlőegységgel rendelkezik.
+    \item MI (Multiple Instruction stream) - többszörös utasításfolyam: az architektúra több utasításfolyamot tud egyidőben végrehajtani.
+    \item SD (Single Data stream) - egyszeres adatfolyam: egy CPU egy adatfolyamot dolgoz fel.
+    \item MD (Multiple Data stream) - többszörös adatfolyam: több végrehajtó egység egy időben dolgoz fel több, egymástól független adatfolyamot.
+\end{itemize}
+Ezek alapján a következő architektúra osztályok határozhatók meg:
+\begin{itemize}
+    \item SISD (Single Instruction Single Data): Neumann modell, szekvenciális végrehajtás.
+    \item SIMD (Single Instruction Multiple Data): multimédiás feldolgozás, ugyanazon műveletek végrehajtása sok adaton.
+    \item MISD (Multiple Instruction Single Data): elméleti, nem használják a gyakorlatban.
+    \item MIMD (Multiple Instruction Multiple Data): teljes párhuzamos feldolgozás.
+\end{itemize}
+A Flynn modell egyszerű és átlátható, de nem utal a párhuzamosság fajtájára, szintjére és módjára.
+
+\subsection{Új modell}
+Az új osztályozás megkülönböztet adatpárhuzamos és funkcionálisan párhuzamos architektúrákat.
+\subsubsection{Adatpárhuzamos architektúrák}
+Az adatpárhuzamos architektúrák típusai:
+\begin{itemize}
+    \item verktor
+    \item asszociatív (neurális)
+    \item SIMD
+    \item szisztorikus
+\end{itemize}
+A gyakorlatban leggyakrabban a SIMD architektúrákat használják, a tárgy is csak erre tér ki.
+\subsubsection{Funkcionálisan párhuzamos architektúrák}
+A funkcionálisan párhuzamos architektúrák típusai:
+\begin{itemize}
+    \item utasítás szinten párhuzamos (ILP)
+    \begin{itemize}
+        \item futószalag (időbeli párhuzamosság)
+        \item VLIW (térbeli+időbeli párhuzamosság)
+        \item szuperskalár (térbeli+időbeli párhuzamosság)
+    \end{itemize}
+    \item szál szinten párhuzamos (SMT - Simultaneous multithreading), pl. Intel Hyper Threading
+    \item folyamat szinten párhuzamos
+    \begin{itemize}
+        \item elosztott memória használatú
+        \item közös memória használatú
+    \end{itemize}
+\end{itemize}
+
+\section{Történeti áttekintés}
+A desktop gépekben először a 80-as években jelent meg a párhuzamosság, futószalag elvű processzorokkal.
+Ezek voltak az első ILP processzorok, skalár CPU-nak is hívták őket.
+A szuperskalár processzorok a 90-es évek elején jelentek meg, majd később kiegészültek multimédiás kiterjesztéssel.
+A szuperskalár processzorok dinamikus utasítás ütemezéssel rendelkeztek, így elérték a sorrenden kívüli kibocsátást és a kibocsátási párhuzamosságot.
+A 2000-es évektől a fejlődésnek két iránya jelent meg: evolúciós és revolúciós.
+\paragraph{Evolúciós fejlődés:} a logikai architektúra változatlan, viszont a feldolgozási szélesség 32-ről 64 bitre nőtt.
+Ennek eredménye az x86-os architektúra bővülése x86\_64-re.
+\paragraph{Revolúciós fejlődés:} ez egy teljesen új logikai architektúrát és utasításkészletet eredményezett.
+Ez az Intel és a HP által kifejlesztett VLIW elvű, IA64 architektúra.
+\paragraph{Eredmény:} a fejlődés eredményeként megjelentek a többmagos processzorok, a mai napig ez az irány a meghatározó.
+
+\section{Utasítások felbontása}
+A processzor által végrehajtott utasítások négy elemi műveletre oszthatók:
+\begin{itemize}
+    \item Fetch
+    \item Decode
+    \item Execute
+    \item WriteBack
+\end{itemize}
+
+\section{Kibocsátás és végrehajtás}
+A kibocsátás a processzor dekódoló egységéből történik, ezeket a kibocsátott utasításokat hajtják végre a végrehajtó egységek.
+Ha a CPU képes párhuzamosan több utasítás végrehajtására, a kibocsátási kapacitást is növelni kell.
+Ha a CPU a dekódoló egységéből óraciklusonként 1-nél több utasítás kibocsátására képes, megvalósul a kibocsátási párhuzamosság.
+\paragraph{Következmények:}
+\begin{itemize}
+    \item Az utasítások párhuzamos végrehajtása során minden ILP CPU-nak figyelembe kell vennie az utasítások között fennálló függőségeket.
+    \item Meg kell őrizni a soros végrehajtás konzisztenciáját (a programozó soros végrehajtású programot ír, ennek párhuzamos végrehajtás esetén is ugyanúgy kell viselkednie).
+\end{itemize}
