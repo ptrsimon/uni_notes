@@ -3,7 +3,9 @@
 \chapter{Függőségek} \label{fuggosegek}
 
 \section{Bevezetés}
+Függőség alakul ki, ha egy programban az egymást követő utasítások függenek egymástól.
 A függőségek gátolják a párhuzamos végrehajtást.
+Következmény pl. a futószalag processzoroknál, hogy a teljesítmény nem növelhető egy bizonyos ponton túl a fokozatok növelésével a függőségek és az egyes lépéseknél felmerülő időveszteségek miatt.
 
 \section{Típusai}
 \begin{itemize}
@@ -98,7 +100,7 @@ Mivel már t\textsubscript{3} időpillanatban is rendelkezésre áll az SHL utas
 Ezt a megoldást minden modern CPU használja.
 
 \begin{figure}[H]
-    \includegraphics[width=0.6\textwidth]{operandus_elorehozas}
+    \includegraphics[width=0.6\textwidth]{eredmenyvissza}
     \centering
     \caption{Az eredmény visszavezetése a forrás regiszterbe}
     \label{fig:operandus_elorehozas}
@@ -112,7 +114,7 @@ Ennek látható az általános adatútja a \ref{fig:lehivas_elorehozas} ábrán,
 Így egy óraciklust megspórolhatunk.
 
 \begin{figure}[H]
-    \includegraphics[width=0.6\textwidth]{lehivas_elorehozas}
+    \includegraphics[width=0.7\textwidth]{lehivasvissza}
     \centering
     \caption{A lehívott adat bevezetése a műveletvégző egységbe}
     \label{fig:lehivas_elorehozas}
