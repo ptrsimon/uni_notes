@@ -1,0 +1,15 @@
+% 9. előadás vége
+
+\chapter{Szál szinten párhuzamos architektúrák}
+
+\section{Bevezetés}
+Az Intel 80386-os processzora óta bevezetett újítások a fogyasztás és a lapkaméret növekedésével jártak, viszont ehhez képest a teljesítmény csak kisebb mértékben javult.
+Tehát a teljesítmény növekedése nem állt egyenes arányban a komplexitás növekedésével.
+Ez elsősorban az egy magos processzorokra igaz.
+Következmény, hogy egyre több tranzisztor kell és nő a fogyasztás.
+Ennek megoldásához el kellett térni a klasszikus tervezési elvektől, ahol csak utasítás szinten használták ki a párhuzamosságokat.
+A fejlődés következő lépcsőjét a szál szintű párhuzamosság kihasználása jelentette.
+
+\section{A szál}
+A szál a program legkisebb önállóan végrehajtható része $\rightarrow$ párhuzamosan futtatható.
+Míg az utasítás szintű párhuzamosság felderítésére önmagában képes a hardver, a szálak kihasználásához az operációs rendszer támogatására is szükség van.
