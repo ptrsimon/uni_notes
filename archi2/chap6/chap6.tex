@@ -118,7 +118,12 @@ A buszokon logikai 1-esek és 0-k közlekednek. Annak, hogy az érzékelők ezek
 Ezt írja le a Data Valid Window fogalma: ahhoz, hogy az érzékelő egy jelet érvényesnek tekintsen, a jelnek egy bizonyos feszültség intervallumba kell esnie és egy bizonyos ideig fenn kell állnia.
 A DVW a \ref{fig:dvw}. ábrán látható, itt a pirossal ábrázolt területbe nem szabad beleesnie a jelnek, hogy érvényes legyen.
 Ez gátolja a feszültség csökkentésének lehetőségeit, mivel nagyon kis feszültség esetén a kisebb zavarok is azt eredményezhetik, hogy a jelet ne tekintse érvénytelennek az érzékelő.
-A frekvencia is csak bizonyos pontig növelhető, mivel nagy frekvencián a jelek elcsúsznak egymástól, ez a delay skew.
+A frekvencia is csak bizonyos pontig növelhető, mivel:
+\begin{itemize}
+    \item nagy frekvencián a párhuzamos vezetékeken érkező jelek elcsúsznak egymástól (delay skew, megoldás soros busszal),
+    \item jel visszaverődések, azaz reflexiók léphetnek fel (kezelése hullám impedancia lezárással lehetséges),
+    \item fázisbizonytalanság (jitter) jelenhet meg, azaz a zavarok elmossák a jelek felfutó és lefutó éleit és zavarja a jelszintek stabil állapotát. A jitter okozói a vezetékek közötti áthallás és a külső vagy belső elektromágneses interferencia (megoldás: LVDS - low voltage differential scaling, tehát a jelet két vezetéken, két különböző feszültségszinten továbbították, a logikai 0 és 1 értékeket a feszültségek különbségéhez rendelik. Pl. PCIe, QPI, DMI).
+\end{itemize}
 A feszültség növelésével viszont tovább növelhető a frekvencia, mivel a felfutási idő röviebb lesz, meredekebb a felfutási szög, így könnyebb megfelelni az időbeli követelményeknek.
 A feszültség (fogyasztás) és a frekvencia (teljesítmény) tehát egymással ellentétes célok, ezért a processzorok gyakran dinamikusan változtatják a feszültség és frekvencia értékeiket: alacsony terhelésen kis feszültség és frekvencia, nagy terhelésen magasabb feszültség és frekvencia.
 \begin{figure}[H]
