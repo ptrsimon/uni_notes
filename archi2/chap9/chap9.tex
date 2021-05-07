@@ -1,0 +1,47 @@
+% 11. előadás vége
+
+\chapter{A DDR4 memória}
+
+\section{Bevezetés}
+A DDR3 memóriák viszonylag alacsony sávszélessége és magas fogyasztása miatt szükségessé vált a RAM-ok továbbfejlesztése, így született meg a DDR4.
+
+\section{Összehasonlítás}
+A DDR4-es memóriák alacsonyabb feszültségen üzemelnek, így kevesebbet fogyasztanak.
+Ezen kívül több pines csatlakozót használ, így nem kompatibilis a DDR3-al.
+Mindkettő 8n prefetch eljárást alkalmaz.
+Újdonság a DDR4-nél a bank groupok létrehozása.
+Míg a DDR3-nál 1 chip 8 különálló bankot tartalmaz, DDR4-nél 1 chip 4 db 4 bankból álló csoportot.
+\begin{center}
+    \begin{tabular}{c | c | c}
+            & DDR3 & DDR4 \\
+        \hline
+        Feszültség & 1,5-1,35V & 1,2V \\
+        \hline
+        Csatlakozó & 240 pin & 284 pin \\
+        \hline
+        Prefetch & 8n & 8n \\
+        \hline
+        Bankok & 8 x 1 & 4 x 4 \\
+    \end{tabular}
+\end{center}
+
+\section{A bank groupok}
+A bankok csoportosításának előnye, hogy a groupokból a vezérlés egyszerre kettőt vagy négyet is kiválaszthat, ami a sávszélesség növekedéséhez vezet (mivel a memória műveletek párhuzamosan futnak le).
+
+\section{Prefetch}
+A prefetch technológia két okból maradt ugyanúgy 8n:
+\begin{itemize}
+    \item a 16n-hez még több pinre lett volna szükség és
+    \item a 16n nem illeszkedik a 64 byte-os cache vonal mérethez (ez csökkentette volna a teljesítményt).
+\end{itemize}
+
+\section{További újítások}
+\begin{itemize}
+    \item CRC (Cyclic Redundancy Check) ellenőrzés $\rightarrow$ véletlenszerű anomáliákat is érzékeli (és akár javítja is), biztosabb az adat olvasása.
+    \item Chipenkénti extra paritás.
+    \item ODT (On-Die Termination): chipenkénti lezárás, a feszültség szabályozásban segít, így alacsonyabb feszültségen is stabilan működik a memória.
+\end{itemize}
+
+\section{Értékelés}
+A DDR4 nagyobb kapacitása miatt ugyan növekedett a késleltetés, viszont ezt ellensúlyozza a nagyobb sávszélesség.
+A cache-ek használata miatt pedig a sávszélesség fontosabb mint a késleltetés mértéke.
