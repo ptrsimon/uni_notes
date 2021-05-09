@@ -149,7 +149,128 @@ A cache-eket jellemző paraméterek:
     \item elhelyezkedés (on chip - processzorlapkán, vagy off-chip - különálló)
     \item blokk méret: a fő tár és a cache között egy egységben mozgatott adatmennyiség (4-64 byte, adatnál és utasításnál eltérő lehet)
     \item sorméret (line size): az az adatmennyiség, amely egy összehasonlításnál maximálisan kijelölhető. Általában a blokk mérettel azonos, de kisebb is lehet.
-    \item helyettesítési stratégia
+    \item helyettesítési algoritmus (replacement policy): meghatározza azt a módot, ahogy a felesleges blokkot a cache-ben kiválasztjuk egy szükséges új blokk betöltésekor. Ilyen algoritmusok pl.:
+    \begin{itemize}
+        \item FIFO - legrégebben betöltött blokkot írja felül
+        \item LIFO - legutoljára betöltött blokkot írja felül
+        \item LFU (Least Frequently Used) - legritkábban használt blokkot írja felül
+        \item LRO (Least Recently Used) - legrégebben használt blokkot írja felül
+    \end{itemize}
     \item adat aktualizálási módszer
-    \item koherencia mechanizmus
+    \begin{itemize}
+        \item write through - az adat változása esetén azonnal visszaírásra kerül az operatív tárba (biztosabb)
+        \item write back - csak az adott cache line felülírása előtt aktualizál (gyorsabb, gyakrabban használt, de áramszünet esetén adatvesztés léphet fel, ezért pl. a RAID vezérlők esetében akkumulátorral támogatják a cache-t)
+    \end{itemize}
+    \item koherencia mechanizmus: az a módszer, amely biztosítja a fő tár és a cache tárak tartalmának egyezőségét
+\end{itemize}
+
+\section{Típusok}
+
+\subsection{Teljesen asszociatív cache}
+Egy beolvasott blokk a cache-ben bárhová (bármelyik sorba) kerülhet. Előnye a nagy találati arány és a rugalmasság, mivel mindig a legoptimálisabb adatokat tölthetjük be.
+Keresésnél a CPU a tageket vizsgálja minden sorban, egyszerre, mivel az adat bárhol lehet.
+Ennek megvalósításához szükséges n darab párhuzamos összehasonlító áramkör, ami viszont drága, bonyolult és nagyobb a fogyasztása.
+
+\subsection{Direct mapping}
+Ennél a megoldásnál minden memória blokk csak egy bizonyos cache line-ba tölthető be.
+A blokk helyét a blokk sorszám határozza meg.
+Mivel egy cache cellához több memória blokk is hozzá van rendelve, előfordulhat, hogy gyakran cserélni kell a cache tartalmát, ami teljesítmény csökkenést okozhat.
+Így a megoldás rugalmatlan és kisebb a találati arány.
+Előnye viszont a gyors visszakeresés és az olcsó megvalósítás (mivel csak egy összehasonlító áramkör kell).
+
+\subsection{n-way (set) associative cache}
+Az előző két módszer közötti kompromisszumot jelenti ez a módszer.
+n jellemzően 2, 4, 8 vagy 16.
+Az n változó meghatározza, hogy egy adott blokk hány cache line-ba kerülhet.
+Például egy 4 utas asszociatív cache-nél egy blokk 4 cache line-ba kerülhet.
+Eredmény, hogy a CPU a csoport index alapján 4 darab blokkra tudja szűkíteni a keresést, tehát csak 4 összehasonlító áramkör kell.
+Előny, hogy rugalmasabb és nagyobb találati arányú mint a direct mapping, de olcsóbb, mint a teljesen asszociatív.
+Az Intel általában 8 utas asszociatív cache-t használ.
+
+\subsection{Sector mapping cache}
+A gyakorlatban ritkán használt, itt a blokk helye kötött a csoportokon belül, viszont a csoport bárhová kerülhet.
+
+\section{Cache hierarchia}
+A gyorsítótárak hierarchiája látható a \ref{fig:hierarchia}. ábrán.
+Régebbi rendszerekben csak L1 adat és utasítás cache volt, ezek fölött csak a memória állt, később megjelent az L2, majd az L3 cache is.
+\begin{figure}[H]
+    \includegraphics[width=0.7\textwidth]{hierarchia}
+    \centering
+    \caption{A gyorsítótárak hierachiája}
+    \label{fig:hierarchia}
+\end{figure}
+
+\section{Cache line felépítése}
+\paragraph{Példa:} 64 byte-os cache line esetén a cache line részei:
+\begin{itemize}
+    \item Directory Entry: tag és egyéb állapotjelzők.
+    \item Data: maga az adat.
+\end{itemize}
+Ennek a felépítése látható a \ref{fig:cacheline}. ábrán.
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{cacheline}
+    \centering
+    \caption{A cache line felépítése}
+    \label{fig:cacheline}
+\end{figure}
+
+\section{Adat szervezési módok}
+Többszintű cache-ek esetén megkülönböztetünk inclusive és exclusive gyorsítótárakat.
+
+\subsection{Exclusive cache}
+Exclusive cache esetében a tárolók egymástól függetlenek, nem tartalmazzák egymás adatait, így ugyanaz az adat nem lehet jelen egyszerre több tárban.
+Az adatok betöltése kétféleképpen történhet.
+Az egyik lehetőség, hogy először az L1-be töltjük be az adatokat, majd ami nem fér bele, azt az L2-be, és ami oda se, azt az L3-ba.
+Ilyenkor nevezzük az L3-at victim cache-nek is.
+
+\subsection{Inclusive cache}
+Inclusive cache-eknél az L2 tartalmazza az L1 adatainak másolatát is.
+Hátrány, hogy csökken L2 szabad mérete és kétszer kell írni, viszont előny, hogy L1-ben minden sor szabadon cserélhető, mert L2-ben megvan (ahonnan majd kiírásra kerülhet).
+A másik előny, hogy több mag esetén, amikor egy másik mag cache-ében kell keresni az adatot, a duplikálás miatt elég L2-ben keresni.
+Mivel manapság elég nagy méretű cache-eket használnak, az előnyök miatt inkább inclusive cache-t alkalmaznak (főleg több magos processzoroknál).
+
+\section{Data prefetch logic}
+További gyorsítási lehetőség a data prefetch logic, ami általában L2-ben található.
+Az L1 cache adatelérési sémáit elemzi, és ha szekvenciális lekérést talál, akkor előre behúzza az adatokat a memóriából L2-be vagy L3-ba.
+
+\section{Cache koherencia probléma}
+Fontos a gyorsítótár egyezőség fenntartása több CPU vagy mag esetén.
+Ezek megoldására léteznek az alábbi cache koherencia protokollok:
+\begin{itemize}
+    \item snoopy
+    \item snorf (ritka)
+    \item könyvtár alapú
+    \item MESI
+\end{itemize}
+Cél, hogy a módosított adat a lehető leggyorsabban bekerüljön az összes processzor gyorsítótárába, mielőtt a többi esetlegesen műveletet végezne rajta.
+Az adat változás érvényesítése kétféleképpen történhet:
+\begin{itemize}
+    \item invalidáció: érvényteleníti az összes cache tárban az adott cellát (valid bit segítségével)
+    \item felülírja az új állapottal
+\end{itemize}
+Az első módszernél write back alapú rendszerekben előfordulhat, hogy a helyes eredmény még nem íródott vissza az operatív tárba.
+Ezért nem elég invalidálni, hanem el kell kérni a helyes adatot a másik CPU-tól vagy magtól.
+A felülírásos rendszernél ilyen probléma nem áll fent, a CPU vagy mag egyszerűen direktben küldi el a változott adatot a többi CPU-nak vagy magnak.
+A gyakorlatban mégis inkább az invalidációt alkalmazzák, mivel egy invalidálási üzenet sokkal kisebb, mint egy teljes cache cella tartalma.
+
+\subsection{Snoopy protokoll}
+A magok vezérlői folyamatosan figyelik, "szaglásszák" a közvetítő adat buszt.
+Olyan tranzakciót keresnek, amik hatással vannak önmagukra.
+Például ha egy cache írási művelettel találkozik, aminek a tagje olyan, amit ő is tárol, azonnal invalidálja azt a cache line-t és elkéri az aktuális adatot a másik magtól.
+Előnye az egyszerű kiépíthetőség, de hátrány, hogy terheli a buszrendszert.
+
+\subsection{Könyvtár alapú protokoll}
+A megosztott adatok egy közös könyvtárban vannak elhelyezve.
+A könyvtár egy szűrőként működik, amelyen keresztül a processzornak engedélyt kell kérnie, hogy betölthessen egy adatot az operatív tárból.
+Ha a bejegyzés változik, a könyvtár vagy felülírja, vagy invalidálja a többi cache tartalmát.
+Ezzel a megoldással nincs szükség külön buszra.
+Elsősorban NUMA rendszerekben használatos.
+
+\subsection{MESI protokoll}
+A MESI a Modified Exclusive Shared Invalid rövidítése. A protokoll állapotjelzői:
+\begin{itemize}
+    \item Modified: egy tár valid, a többi invalid - egyik tárban módosult de még nincs visszaírva
+    \item Exclusive: érvényes adat, egyezik a fő tárral, és csak egy helyen van meg
+    \item Shared: az adat a fő tárral egyezik, de több tárolóban is megtalálható
+    \item Invalid: az adat érvénytelen
 \end{itemize}
