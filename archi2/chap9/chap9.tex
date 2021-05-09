@@ -1,4 +1,4 @@
-% 11. előadás vége
+% 11. előadás vége, 12. előadás eleje
 
 \chapter{A DDR4 memória}
 
@@ -43,5 +43,19 @@ A prefetch technológia két okból maradt ugyanúgy 8n:
 \end{itemize}
 
 \section{Értékelés}
-A DDR4 nagyobb kapacitása miatt ugyan növekedett a késleltetés, viszont ezt ellensúlyozza a nagyobb sávszélesség.
-A cache-ek használata miatt pedig a sávszélesség fontosabb mint a késleltetés mértéke.
+A kisebb feszültség eléréséhez szükséges volt a memóriacellák órajelének csökkentése a DDR3-hoz képest, ez látható a következő táblázatban:
+\begin{center}
+    \begin{tabular}{c | c | c | c | c}
+        Effektív órajel & f\textsubscript{core} & Max. sávszélesség & Késleltetés (időzítés) & Elérési idő \\
+        \hline
+        DDR3-2133 MHz & 266 MHz & 17066 MB/s & 14-14-14-34 & \~13,1 ns \\
+        \hline
+        DDR4-2133 MHz & 133 MHz & 17066 MB/s & 15-15-15-35 & \~14,1 ns \\
+        \hline
+        DDR4-2400 MHz & 150 MHZ & 19200 MB/s & 16-16-16-39 & \~13,3 ns \\
+    \end{tabular}
+\end{center}
+Látható, hogy a DDR4-es memóriák alacsonyabb frekvencia mellett nagyobb sávszélességet tudnak biztosítani, mint a DDR3, ugyanakkor növekedett a késleltetés és az elérési idő.
+A cache-ek használata (L3) miatt viszont a sávszélesség fontosabb, mint a késleltetés mértéke, ezért a gyakorlati alkalmazásokban (pl. multimédia) a DDR4 előrelépést jelentett.
+További előnye a DDR4-nek, hogy az effektív órajel tovább növelhető az alacsonyabb magfrekvencia miatt.
+Míg a DDR3 felső korlátja 2133 MHz, a DDR4 3000 MHz fölé is mehet.

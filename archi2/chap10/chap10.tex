@@ -1,0 +1,155 @@
+% 12. előadás
+
+\chapter{Cache tárak}
+
+\section{Bevezetés}
+A cache tárak (gyorsítótárak) feladata az adatforgalom gyorsítása és egyenletessé tétele.
+Önálló tároló szerepe nincsen, mindig az operatív tár bizonyos részeinek másolatát tartalmazza.
+A cache működése transzparens, önállóan nem címezhező, így a kezelését a programozó helyett a hardver végzi.
+Elhelyezkedése legtöbbször a processzor lapkáján található.
+\paragraph{Definíció:} a cache az adatok és utasítások átmeneti tárolására szolgáló, gyors működésű tároló.
+
+\section{Történeti áttekintés}
+A cache elterjedése és fejlődése kb. 1980-tól kezdődött, előtte még terveztek processzorokat cache nélkül.
+1980-tól 2000-ig kb. milliószorosára nőtt a processzorok teljesítménye, míg a memória elérés csak kb. százszorosára.
+Ez tette szükségessé a gyorsítótárak fejlesztését.
+
+\section{Elhelyezés a tárolók piramisában}
+A piramis második szintjén helyezkedik el a cache (\ref{fig:storage}. ábra). Az ábrán felsorolt tárolók közül a felső hármat kezeli közvetlenül a processzor.
+\begin{figure}[H]
+    \includegraphics[width=0.7\textwidth]{storage}
+    \centering
+    \caption{A tárolók piramis modelle}
+    \label{fig:storage}
+\end{figure}
+
+\section{Adatátvitel}
+Az adatátvitel a RAM és a cache között mindig blokkos formában történik, mivel nagy valószínűséggel az utasítások és adatok felhasználása is az egymás utáni tároló címekből történik.
+A processzor és a cache közötti adatátvitel ezzel szemben lehet byte szintű is.
+Fontos, hogy a cache kisebb mérete miatt mindig dönteni kell, hogy a memóriából mely adatokat töltse be a rendszer.
+
+\section{Felosztás}
+A tapasztalat azt mutatta, hogy érdemes az utasításokat és az adatokat külön-külön cache-ben tárolni, ezért a modern processzorok már ezt a felépítést alkalmazzák (pl. Intel 1993-tól használ külön adat- és utasítás cache-t).
+Ennek okai:
+\begin{itemize}
+    \item az adatok és utasítások általában elég függetlenül kezelhetők
+    \item előfordulhat, hogy egy programrészlet sok adattal dolgozik (ekkor közös cache esetén előfordulhatna, hogy a sok adat miatt kikerülnek a programhoz tartozó utasítások, ami lassuláshoz vezetne)
+    \item utasítás cache-nél csak az olvasást kell gyorsítani, míg adatoknál az írást és az olvasást is $\rightarrow$ eltérő technológiák
+\end{itemize}
+A modern, három szintű cache-t használó rendszerekben a következő típusú gyorsítótárak jelennek meg:
+\begin{itemize}
+    \item utasítás cache - Level 1
+    \item adat cache - Level 1
+    \item mixed cache - Level 2, 3
+\end{itemize}
+
+\section{Tervezési szempontok}
+A cache tervezésének alapvető dilemmája, hogy el kell dönteni melyik a fontosabb: a sebesség, vagy a találti arány.
+Mivel a gyorsítótárakban az adatokat keresni kell, minél nagyobb a kapacitása, annál hosszabb időbe telik a keresett adatot megtalálni.
+Ezért egy olyan kompromisszumot kell kötni, amikor még nem túl sok idő megtalálni egy bizonyos adatot, de már nem kell túl gyakran az operatív tárhoz fordulni.
+A processzorok gyorsulásával egyre több gyorsítótárra volt szükség, de a kapacitást már az előbb említettek miatt már nem volt hatékony növelni.
+Erre a megoldás a többszintű gyorsítótár bevezetése.
+Először az L1 mellett az L2, majd később az L3 cache is megjelent.
+A legkisebb és leggyorsabb az L1 cache, a legnagyobb és leglassabb pedig az L3.
+
+\section{A cache szintek összehasonlítása}
+Az L1 cache a regiszter utáni leggyorsabb tároló, általában a CPU órajelén üzemel.
+Mérete kicsi, nagyságrendileg 2x32 vagy 2x64 KByte.
+Késleltetése alacsony, kb. 1,3-1,5 ns (3-4 óraciklus).
+A késleltetések a többi cache szint között a következő táblázatban láthatóak.
+\begin{center}
+    \begin{tabular}{c | c | c}
+        & Elérési idő (sec) & Elérés idő (ciklus) \\
+        \hline
+        L1 & 1,3-1,5 ns & 3-4 \\
+        \hline
+        L2 & 4,5-8 & 10 \\
+        \hline
+        L3 & 12-20 & 20-40 \\
+        \hline
+        RAM & 60-80 & 50-200 \\
+    \end{tabular}
+\end{center}
+
+\section{Gyakorlati példák}
+\begin{itemize}
+    \item Intel 80486: 128 kB L1
+    \item Intel P1/P2: 128 kB L1, 512 kB L2
+    \item Intel P4: 256 kB L1, 1 MB L2
+    \item Intel Core 2: 512 kB L1, 2-8 MB L2
+    \item Intel Core i: 2x32 kB L1, 256 kB, 3-8 MB L3
+\end{itemize}
+
+\section{Memória és cache közötti kapcsolat}
+
+\subsection{Példa a címzésre}
+Egy 2 GB RAM felosztható 512 darab 4 MB-os blokkra.
+A címeket kétutas asszociatív cache esetén kétfelé lehet osztani és ezeket eltárolni a blokkokban.
+
+\subsection{Adat szinkronizáció}
+Lényeges szempont a cache tároló és az operatív tár azonos részei tartalmának az egyezőségét biztosítani.
+Tehát ha egy, a cache-ben tárolt operandus értéke megváltozik, azt vissza kell írni az operatív tárba is.
+
+\subsection{Címek tárolása}
+A cache-ben a memória egyes, egymást követő rekeszeinek tartalmát tároljuk, de ezek mellé el kell tárolni az adatok memóriabeli címét is.
+A memória címnek csak akkora részét kell tárolni a cache-ben, amelynek alapján közvetlenül (a tárolt értékből) vagy közvetve (a tárolt értékből és annak cache-beli helyéből, sorából - cache line) a blokk kezdő címe meghatározható.
+A címnek azt a részét, amelyet a cache-ben elhelyez a CPU, és ami alapján a kiválasztás történik, tagnek nevezzük.
+Ez származhat fizikai vagy virtuális címből, attól függően, hogy a cache a CPU és az MMU (memory management unit), vagy az MMU és a RAM között helyezkedik el.
+Az első esetben fizikai, a másodikban virtuális címekből történik a tag származtatása.
+A virtuális címek használatának hátránya, hogy a tárolandó tag nagyobb, mivel a virtuális címtér is nagyobb és hosszabbak a címek.
+További hátrány, hogy a virtualizációból adódó helyettesítéseket kezelni kell.
+Előny ugyanakkor, hogy a virtuális tag csökkenti a cache hiba késleltetést.
+A virtuális tagelés hátrányai miatt általában a mai architektúrák fizikai tageket használnak.
+
+\subsection{Visszakeresés}
+A visszakeresés módja az ún. tartalom szerinti visszakeresés (CAM - Content Address Memory), ami azt jelenti, hogy a vizsgált adatnak a cache-ben tárolt adattal való egyezőségét vizsgálja a CPU kiolvasáskor és kereséskor.
+A vizsgálat a keresett adat címének összehasonlítását jelenti a cache-ben tárolt címekkel, vagy azok egy részével.
+A cache akkor működik hatékonyan, ha a keresett adat a kiválasztások többségében a cache-ben, és nem a memóriában található.
+Ha a keresett adat a cache-ben megtalálható, cache hitről beszélünk, ellenkező esetben cache miss lép fel.
+
+\section{Cache hit}
+A találatok aránya függ a cache
+\begin{itemize}
+    \item méretétől és
+    \item szervezési módjától.
+\end{itemize}
+A modern rendszerekben a találati arány közelít a 100\%-hoz, az elvárt hibaarány 1-2\%.
+
+\section{Cache miss}
+Ha a keresett adat nem található meg a gyorsítótárban, a CPU a RAM-ból olvas, viszont a regiszeren kívül a cache-be is betölti.
+
+\section{Replacement policy}
+A cache tároló tartalmának cseréjekor a találati arány fenntartása érdekében szükséges a megfelelő helyettesítési stratégia (replacement policy) kiválasztása.
+Alapértelmezés szerint a cache tele van, ezért ha más adatokra lenne szükség, mint amit jelenleg tárol, bizonyos részeit ki kell cserélni.
+Ezeknek a cseréknek a módját határozza meg a replacement policy.
+
+\section{Állapot bitek}
+A cache-ben az adaton és a tagen kívül az adatok állapotára vonatkozó információt is tárolni kell.
+Ezek a vezérlést és a helyettesítési eljárást kiszolgáló bitek.
+A legfontosabb vezérlő bitek:
+\begin{itemize}
+    \item V (valid) bit
+    \item D (dirty) bit
+\end{itemize}
+
+\subsection{Valid bit}
+A valid bit a cache tartalmának érvényességét jelzi a cache sorra vonatkozóan.
+Ha be van állítva, az adat a megadott című tárolóhelyhez tartozik, és aktuálisan érvényes.
+Például törlés (flushing cache line) esetén a V bit 0-ra lesz beállítva, ezzel jelzi a processzor számára, hogy az adott területre szabadon lehet írni.
+Minden blokkhoz legalább egy V bit tartozik.
+
+\subsection{Dirty bit}
+A dirty bit egy blokk valamely részének felülírását vagy módosítását jelzi.
+Az ilyen blokk helyére nem lehet újat betölteni, előbb a módosított adatokat ki kell írni az operatív tárba.
+
+\section{Jellemzők}
+A cache-eket jellemző paraméterek:
+\begin{itemize}
+    \item méret (32kB - 20MB)
+    \item elhelyezkedés (on chip - processzorlapkán, vagy off-chip - különálló)
+    \item blokk méret: a fő tár és a cache között egy egységben mozgatott adatmennyiség (4-64 byte, adatnál és utasításnál eltérő lehet)
+    \item sorméret (line size): az az adatmennyiség, amely egy összehasonlításnál maximálisan kijelölhető. Általában a blokk mérettel azonos, de kisebb is lehet.
+    \item helyettesítési stratégia
+    \item adat aktualizálási módszer
+    \item koherencia mechanizmus
+\end{itemize}
