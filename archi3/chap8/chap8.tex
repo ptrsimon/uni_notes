@@ -128,3 +128,79 @@ A cél a HPC helyett egy széleskörű alkalmazás palettát támogatni és a NE
 Az SVE-t csak a Fujitsu A64FX processzora implementálta.
 Ennek oka, hogy az eredeti SVE nagyrészt HPC feladatokra volt kitalálva, de a mobilok nem futtatnak ilyen alkalmazásokat.
 Ezzel szemben az SVE2 elsősorban a szervereket célozza meg, ahol gyakoriak az ilyen feladatok.
+
+\section{Az ARM CPU-k áttekintése}
+Az ARM CPU-k csoportosítása:
+\begin{itemize}
+    \item Korai ARM CPU-k
+    \begin{itemize}
+        \item ARMv1 és v2 (1985-1990): 26 bites címbuszú rendszerek, nem tárgyaljuk őket. Pl.: ARM1-ARM3
+        \item ARMv3-v6 (1991-2004): 32 bites rendszerek. Pl.: ARM6xx-ARM11xx
+    \end{itemize}
+    \item ARM Cortex CPU-k (ARMv7-v9): 2004-től, ma is ezek az uralkodók. 8.0-tól 64 bites
+    \item ARM Neoverse CPU-k (ARMv9): 2021-től, szerverekhez készültek, teljesen új család
+\end{itemize}
+
+\subsection{Cortex CPU-k}
+A Cortex CPU-k a jelenlegi mobil világ alapját alkotják.
+2004-ben vezették be, elsőként a Cortex-M3 beágyazott processzorban.
+
+\subsection{Cortex profilok}
+A Cortex családot 3 különböző profilra osztották, felhasználás szerint:
+\begin{itemize}
+    \item Cortex-A: alkalmazások
+    \item Cortex-R: kritikus, valós idejű rendszerek
+    \item Cortex-M: mikrokontroller, nem annyira kritikus rendszerek
+\end{itemize}
+
+\subsubsection{Cortex-A profil}
+Két utasításkészletet támogat: az A32-t és a T32-t.
+A T32 egy 16 bites utasításokat tartalmazó részhalmaza az A32-nek.
+Az ARMv8-A verzióval megjelent a 64 bites kiterjesztés, a korábbi 32 bites alkalmazásokkal kompatibilis módon.
+A 32 bites alkalmazásokat AArch32 végrehajtási módban, A32 utasításkészlettel futtatja, a 64 biteseket pedig AArch 64 módban, A64 utasításkészlettel.
+Ezzel együtt az AArch64 módban megszüntették a Thumb 16 bites utasításkészlet támogatását.
+Az ARMv9-el a 32 bites utasításokat sem támogatták tovább.
+
+\subsubsection{Cortex-R profil}
+Beágyazott rendszerekhez készült, szintén az A32 és T32 utasításkészleteket támogatja.
+
+\subsubsection{Cortex-M profil}
+Mélyen beágyazott rendszerekhez, mikrokontrollerekhez készült (pl. autóipar).
+Ez csak a T32 16 bites utasításokat támogatja.
+
+\subsubsection{SecurCore profil}
+2007-ben a családot kiegészítették a SecurCore profillal, smart card és egyéb biztonsági alkalmazásokra kifejlesztve.
+
+\subsection{A Cortex-A profilú CPU-k fejlődése}
+2004-ben jelentek meg az első Cortex-A CPU-k, 2011-től támogatták a big.LITTLE felépítést (ARMv7-A ISA).
+Ezt követték az ARMv8-A-t megvalósító, 64 bites CPU-k (2012-ben jelentették be).
+A következő generáció (ARMv8.2-A, 2017) már támogatta DynamIQ magcsoportokat, ami a korábbi big.LITTLE magcsoportokat váltotta.
+2021-ben megjelent az ARMv9-A, ahol jelentősen továbbfejlesztették a DynamIQ-t.
+
+\subsubsection{Az ARMv7-8 CPU-k fejlődése}
+Három teljesítmény osztályt határoztak meg:
+\begin{itemize}
+    \item nagy
+    \item közepes
+    \item és alacsony teljesítmény
+\end{itemize}
+Az eltérő teljesítményű rendszerekhez eltérő lapkaméretek is tartoznak.
+
+A CPU-k fejlődését négy szempont szerint vizsgáljuk:
+\begin{itemize}
+    \item szóhossz
+    \item L2 cache jelenléte
+    \item egy vagy több magos-e a CPU
+    \item big.LITTLE támogatás
+\end{itemize}
+
+Szóhossz tekintetében a v7 rendszerek csak 32 bitet, míg a v8.0 CPU-k 32 és 64 bitet is támogatnak.
+A Cortex-A5 esetében még L2 cache se volt, később (A7-A9) tervezési opcióként jelen volt az L2 cache, majd az A15-től már kötelező tartozéka volt.
+A magok számát tekintve korábban csak egymagos rendszerek léteztek, az A9 viszont már létezett többmagos változatban is (Cortex-A9 MPCore).
+A többmagos rendszerek big.LITTLE felépítést követtek, később az egymagos verziót elhagyták.
+Ma már minden ARM CPU többmagos.
+
+\subsubsection{A big.LITTLE technológia}
+2011-ben hozta nyilvánosságra az ARM, megvalósítása a 32 bites rendszereknél kezdődött (A7, A15).
+Ma már minden mobil erre alapoz.
+A LITTLE mag 2 széles végrehajtó egységet tartalmaz, a big pedig 3 széleset.
