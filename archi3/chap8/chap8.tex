@@ -1,0 +1,130 @@
+% Hetedik előadás
+
+\chapter{ARM processzorok}
+
+Az ARM az Intel és az AMD mellett a harmadik nagy szereplő, a mobil világban egyeduralkodó.
+
+\section{Terminológia}
+Az ARM nem processzorgyártó cég, hanem CPU-kat, GPU-kat, NPU-kat és egyebeket fejlesztenek és a szellemi tulajdont értékesítik.
+Ezzel szemben az Intel, AMD, Qualcomm stb. komplett processzorokat fejlesztenek és forgalmaznak, részben az ARM szellemi tulajdona alapján.
+Ezért az ARM-re CPU - és nem processzor - fejlesztőként hivatkozunk.
+
+\section{Áttekintés}
+Az ARM egy brit félvezető fejlesztő cég (1983-ban alapították, Acorn RISC Machine, de 1990-től az Apple és a VLSI-vel közös projekttel Advanced RISC Machines), amit 2016-ban megvett egy japán bank, a Softbank.
+2021-ben az Nvidia bejelntette, hogy megveszi az ARM-et, de ez még folyamatban van.
+A cég alapvetően tervezéssel foglalkozik, kis áramfogyasztású processzor komponenseket és ezekhez kapcsolódó tervezési eszközöket fejleszt.
+Ezek szellemi termékek, a bevételük ezeknek a licenszeléséből származik.
+
+\subsection{Üzleti modell}
+Az ARM a technológiát licenszeli a félvezető gyártó partnereinek, akik ezért licenszdíjat fizetnek.
+A félvezető gyártó a legyártott processzorokat eladja az OEM gyártóknak (közben royalty-t fizetnek az ARM-nek), az OEM gyártók pedig végfelhasználói termékeket értékesítenek.
+Az ARM figyelembe veszi a partnerek visszajelzéseit.
+\begin{figure}[H]
+    \includegraphics[width=0.7\textwidth]{armbm}
+    \centering
+    \caption{Az ARM üzleti modellje}
+    \label{fig:armbm}
+\end{figure}
+
+\subsection{Licenszelés}
+Az ARM két licenszet forgalmaz:
+\begin{itemize}
+    \item Cortex licensz: az ARM egy komplett mikroarchitektúrát értékesít, konfigurálható opciókkal
+    \item Architektúra licensz: az ARM csak az ISA-t adja át a vevőnek, a vevő dolga megtervezni a saját mikroarchitektúráját (pl. Apple és Samsung)
+\end{itemize}
+
+\subsection{Az ARM dominanciájának okai}
+Az ARM az x86-al szemben egy RISC architektúra, a RISC pedig Load/Store architektúra, tehát az operandusokat a regiszterekből olvassa be.
+Az x86 viszont CISC és megenged operandus olvasást közvetlenül a memóriából.
+Következmények:
+\begin{itemize}
+    \item a CISC utasítások nagyon hosszúak lehetnek a memória címzése miatt (base reg, offset, stb.)
+    \item a RISC-eknél az utasításoknál elég a regisztereken címezni, a Load/Store-nál pedig a memóriát
+    \item a CISC-ek utasításhossza változó, a RISC fix (általában 32 bit)
+    \item a CISC-ek több áramot fogyasztanak, mivel az utasítás lehívás és a dekódolás komplexebb
+\end{itemize}
+A mobil világban nagyon fontos az alacsony fogyasztás, ezért a RISC alapú ARM architektúrák előnye.
+Az ARM processzorok további fejlődésben vannak, újabban a szervereknél is kezdenek teret nyerni.
+2020-ban, mikor az ARM-et megvette az Nvidia, az Nvidia CEO-ja kijelentette, hogy a desktopoknál is a legfontosabb architektúra az ARM lesz a jövőben.
+
+\section{Az ARM ISA fejlődése}
+ Az ARM (RISC) architektúra kezdetben kevés utasítást tartalmazott, de később az utasítások száma meghaladta az x86-ost is.
+ Napjainkig 9 különböző ARM ISA verziót hoztak ki.
+ Az első két verzióban még csak 26 bites címteret használt.
+ Az ARMv3 volt az első olyan ISA verzió, ami már 32 bites címteret használt, ez tekinthető az ARM kiindulópontjának.
+ Az ARM ISA jellemzői (korai változatok):
+ \begin{itemize}
+     \item 32 bites RISC architektúra
+     \item 32 bites fixpontos vagy logikai adatokkal képes dolgozni
+     \item 16 regisztert tartalmaz (13 általános + 3 dedikált)
+ \end{itemize}
+ A fejlődés négy fő irányban történt:
+ \begin{itemize}
+     \item számítási képességek növelése
+     \item programkód méretének csökkentése
+     \item bytekód végrehajtási sebesség növelése
+     \item biztonság fokozása
+ \end{itemize}
+ A korai ARM rendszerek egyszerű, beágyazott alkalmazásokhoz készültek, ahol fontos volt a kód mérete és a bytekód végrehajtás sebessége is kritikus.
+ A 2000-es években az ARM utat talált az alkalmazói processzorokba (mobilok), ahol sokkal általánosabb feladatokat kellett végrehajtania.
+ Megjelent tehát a grafika és így a lebegőpontos számításokra való igény, megjelentek a SIMD utasítások is a számítási teljesítmény növelése érdekében.
+ Fontossá vált a biztonság is.
+ A v7-től kezdve a korábban fontosnak tartott szempontok értelmüket vesztették.
+
+ \section{Számítási képességek fejlődése}
+ Az ARMv3 egy egyszerű, alap architektúra, amit a fejlődés során kiterjesztettek.
+ Egy utasításkészlet kiterjesztéséhez két dologra van szükség: egy regiszterkészlet definiálására és a regisztereken végrehajtható utasítások meghatározására.
+ Az ARN fejlesztése három fő logikai lépésből állt:
+ \begin{itemize}
+     \item a műveletek kiterjesztése fixpontos SIMD utasításokkal (2002, ARMv6)
+     \item másodlagos regiszterkészlet bevezetése skalár lebegőpontos, SIMD lebegőpontos és FX/FP lebegőpontos műveletekhez (2000, ARMv5)
+     \item SVE regiszterkészlet (nagyon széles, 2KB) bevezetése, erre alapozva utasításkészlet kiegészítése (2016, ARMv8.2)
+ \end{itemize}
+
+ \subsection{Fixpontos SIMD kiterjesztés}
+ Ezzel 32 bit szélesen lehetett végrehajtani 8 vagy 16 bites műveleteket (\ref{fig:fxsimd}).
+ \begin{figure}[H]
+    \includegraphics[width=0.7\textwidth]{fxsimd}
+    \centering
+    \caption{Fixpontos SIMD utasítások végrehajtása}
+    \label{fig:fxsimd}
+\end{figure}
+Az ezzel elért teljesítmény növekedés csekély volt, ezért később kiterjesztették a NEON bővítménnyel.
+
+Az ARMv8 ISA-jának két végrehajtási módja volt: 32 és 64 bites.
+Az utóbbihoz kiterjesztették a regiszterkészletet, a 32 bites működés a kompatibilitást szolgálta.
+
+\subsection{Lebegőpontos műveletvégzés}
+A NEON kiterjesztés a multimédiás alkalmazások gyorsítását szolgálta.
+Lehetővé tette, hogy 64 vagy 128 bites hosszú adatokon történjen a műveletvégzés.
+
+\subsection{SVE regiszterkészletre alapuló SIMD kiterjesztések}
+Az SVE-t (Scalable Vector Extension) 2016-ban mutatták be, az ARMv8.2 alapú ISA-ban.
+Csak a 64 bites verzióban volt aktív.
+Alapvető célja a HPC (High Performance Computing), tehát a tudományos jellegű, képfeldolgozó és média alkalmazások támogatása.
+FX és FP műveleteket is támogat.
+A regiszterkészlet nem volt rögzítve, hanem 128 bittől egészen 2 Kb hosszú regiszterek használhatók voltak, tehát többféle fixpontos és lebegőpontos adattípust is támogatott.
+Ezeket hívták Z regisztereknek.
+
+Legfontosabb jellemzője, hogy a programozásban nem kell figyelembe venni a hardveres regiszterek hosszát.
+Így a programozóknak könnyebb kódot írnia, mivel eltérő végrehajtóegység méretű processzorokra ugyanazt a kódot tudja használni.
+A megírt binárisok hordozhatóbbak és automatikus vektorizáció lehetséges a compilerekben.
+
+A megvalósításhoz predikátum regisztereket vezettek be, amiket maszkokként használtak.
+Ez megmutatja, hogy az adat melyik része aktív és melyik nem.
+16 predikátum regiszter áll rendelkezésre.
+A predikátum regisztereket a programkódban be kell állítani.
+
+\subsection{SVE 2}
+Az előző részben leírt SVE-t szinte nem használták.
+Később bemutatták a továbbfejlesztett változatát, az SVE2-t (ARMv9, 2021).
+A cél a HPC helyett egy széleskörű alkalmazás palettát támogatni és a NEON-t kiváltani.
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{sve}
+    \centering
+    \caption{Az SVE és SVE2 összehasonlítása}
+    \label{fig:sve}
+\end{figure}
+Az SVE-t csak a Fujitsu A64FX processzora implementálta.
+Ennek oka, hogy az eredeti SVE nagyrészt HPC feladatokra volt kitalálva, de a mobilok nem futtatnak ilyen alkalmazásokat.
+Ezzel szemben az SVE2 elsősorban a szervereket célozza meg, ahol gyakoriak az ilyen feladatok.

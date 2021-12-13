@@ -1,4 +1,4 @@
-% Ötödik előadás
+% Ötödik és hatodik előadás
 
 \chapter{Az AMD Zen processzorai}
 
@@ -144,7 +144,7 @@ A \ref{fig:vega}. ábrán látható egy példa a CPU hierarchikus felépítésé
     \label{fig:vega}
 \end{figure}
 
-\subsection{A Zen magok fejlődése}
+\section{A Zen magok fejlődése}
 A Bulldozer processzorokhoz képest több téren előrelépést jelentett.
 A Bulldozer magban két egész feldolgozó egységet integráltak egy lebegőpontos feldolgozóval és ezt a modult tekintették két magosnak.
 Ez nem vált be, ezért a Zen visszatért a hagyományos mag felépítéshez (\ref{fig:bulldozervszen}).
@@ -176,7 +176,7 @@ A Zen 1 után megjelent a Zen 2 és a Zen 3, 2022-re ígérik a Zen 4-et.
 A Zen 2-nél 8-ról 16 MB-ra emelték az L3 cache-t és több, kisebb lapkát használtak fel.
 A Zen 3 még tovább növelte az L3 méretét 32 MB-ra és itt már 4 helyett 8 magos komplexeket használtak.
 
-\subsection{A CCX-ek fejlődése}
+\section{A CCX-ek fejlődése}
 A Zen 1-nél 4 magos CCX-eket alkalmaztak (\ref{fig:zen1ccx}. ábra)
 \begin{figure}[H]
     \includegraphics[width=0.4\textwidth]{zen1ccx}
@@ -205,5 +205,212 @@ A Zen 2 architektúra megnövelte az L3 cache méretét, két CCX magblokkot tar
 Itt a két cache összekötését meg kellett oldani, a Zen 3 viszont már közös 32 MB L3 cache-t biztosít a 8 magnak.
 Ez csökkenti az elérési időket és a mag-mag futási időket.
 
-\subsection{A grafikai magok fejlődése}
+\section{A grafikai magok fejlődése}
 Az AMD a Vega számítási egységeit használta fel a Zen processzorokban.
+A GPU-k változó számú CU-kat (Compute Unit) tartalmazhatnak.
+A Vega CU architektúrája az AMD GCN (Graphics Core Next) GPU család 5. generációja, 2017-ben vezették be.
+Ez már támogatja a mesterséges intelligenciához használt 8 vagy 16 bites adatformátumot is.
+
+\subsection{A Vega CU felépítése}
+Minden CU-ban négy SIMD feldolgozó egység van, amikben egyenként 16 ALU van (\ref{fig:vega2}).
+A SIMD egységek egymástól függetlenül működnek és ugyanazt az utasítást hajtják végre 16 szálon.
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{vega2}
+    \centering
+    \caption{A Vega CU felépítése}
+    \label{fig:vega2}
+\end{figure}
+Minden SIMD egység egy 64 KB-os regiszter fájllal rendelkezik, az ALU-k pedig csak lebegőpontos műveleteket hajtanak végre, ezért kell még egy 32 bites, fixpontos utasításokat végző ALU, ami megosztott a négy SIMD egység között.
+Az ALU-k lebegőpontos, 32 vagy 64 bites műveleteket tudnak végrehajtani.
+Ismerik a fused és unfused megoldásokat, a fusednál pl. egy 32 bites szorzás eredménye 64 bit.
+
+Egy Vega GPU több CU-ból áll (3-11 db).
+
+\section{A Zen processzorok építőelemei és felépítése}
+
+\subsection{Első generáció}
+Az első generációban kétféle blokkból épültek fel a processzorok:
+\begin{itemize}
+    \item 8 magos Zeppelin lapka (2 db 4 magos CCX + uncore)
+    \item 4 magos APU lapka (1 db CCX + uncore)
+\end{itemize}
+
+Ebből a különböző processzor típusok felépítése:
+\begin{itemize}
+    \item Mobil APU-k: 1 db APU lapka
+    \item GPU nélküli desktop: 1 db Zeppelin lapka
+    \item HEDT-ek: 2 Zeppelin lapka
+    \item 1S/2S szerverek: 4 Zeppelin lapka
+\end{itemize}
+A Zeppelin lapkákat az IF (Infinity Fabric) köti össze és a memóriavezérlők is a lapkákkal együtt skálázódnak.
+
+\subsection{Második generáció}
+Itt már három blokkból lehetett válogatni:
+\begin{itemize}
+    \item 8 magos, GPU nélküli CCD lapka (két CCX + uncore)
+    \item 8 magos APU lapka (két CCX + Vega + uncore)
+    \item IO lapkák (cIOD - kliens IO lapka vagy IOD - server és HEDT IO lapka)
+\end{itemize}
+
+Ebből felépülő processzorok:
+\begin{itemize}
+    \item Mobil és Desktop APU-k: 1 APU lapka
+    \item GPU nélküli desktop: 1 vagy 2 CCD lapka + 1 kliens IO lapka
+    \item HEDT: 4 vagy 8 CCD + 1 IOD lapka
+    \item 1S/2S szerverek: 4 vagy 8 CCD + 1 IOD lapka
+\end{itemize}
+
+\subsection{Harmadik generáció}
+Építő blokkok:
+\begin{itemize}
+    \item 8 magos, GPU-t nem tartalmazó CCD lapka (egy CCX + uncore)
+    \item 8 magos APU lapka (CCX + Vega GPU + uncore)
+    \item cIOD és IOD
+\end{itemize}
+
+Ebből épülő processzorok:
+\begin{itemize}
+    \item Mobil és Desktop APU-k: 1 APU lapka
+    \item GPU nélküli desktop: 1 vagy 2 CCD lapka + 1 kliens IO lapka
+    \item 1S/2S szerverek: 4 vagy 8 CCD + 1 IOD lapka
+\end{itemize}
+
+\section{Infinity Fabric}
+Az Infinity Fabric az AMD Zen architektúrához tervezett cache koherens kapcsolati rendszer.
+Feladatai:
+\begin{itemize}
+    \item lapkák összekötése cache koherens módon
+    \item bizonyos vezérlési funkciók biztonsítása
+\end{itemize}
+Alapja a korábban használt HyperTransport buszrendszer (hasonló, mint az Intel QPI - Quick Path Interconnect).
+A feladatok ellátásához két alapvető részből áll az Infinity Fabric: Scalable Control Fabric és Scalable Data Fabric.
+
+\subsection{Scalable Control Fabric}
+Felelősségi körei:
+\begin{itemize}
+    \item disszipáció kezelése
+    \item biztonság
+    \item minőségi kérdések
+\end{itemize}
+Tartalmaz központi és távoli elemeket.
+A távoli elemek jellemzően szenzorok mint pl. hőmérséklet, frekvencia vagy feszültség szenzorok.
+Ezeket az AMD egy zárt hurokban használja, egy központi vezérlés mellett (\ref{fig:scf}).
+\begin{figure}[H]
+    \includegraphics[width=0.7\textwidth]{scf}
+    \centering
+    \caption{A Control Fabric működése}
+    \label{fig:scf}
+\end{figure}
+A szenzorok száma nagyon nagy (>1000).
+
+\subsection{Scalable Data Fabric}
+A HyperTransport busz továbbfejlesztett változata.
+Feladatai:
+\begin{itemize}
+    \item lapkán belül a különböző egységek összekapcsolása (CCX, memória és IO vezérlők)
+    \item lapkák összekapcsolása (IFOP On-Package linkek)
+    \item 2S szervereknél a tokok összekötése (IFIS: IF Inter-Socket linkek)
+\end{itemize}
+
+\subsection{Példa: első generációs, GPU nélküli desktop Zen CPU}
+A Ryzen 1000 két CCX blokkot és egy IO vezérlőt tartalmaz, amiket az Infinity Fabric köt össze, 256 bit széles adatátvitelt garantálva (\ref{fig:if}).
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{if}
+    \centering
+    \caption{A Ryzen 1000 IF felépítése}
+    \label{fig:if}
+\end{figure}
+
+\subsection{Példa: első generációs EPYC szerver CPU}
+Az EPYC szerverprocesszorok egy tokozásban több lapkát tartalmaznak, amiket az Infinity Fabric (IFOP) köt össze (minden lapkát minden lapkával).
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{if2}
+    \centering
+    \caption{Négy Zeppelin lapka összekötése IFOP linkkel}
+    \label{fig:if2}
+\end{figure}
+Ezek a linkek kétirányú 32 bites kapcsolatot valósítanak meg, föld-referenciált (single-ended) jelekkel, differenciált órajellel.
+Az energiaigénye átvitelenként 2 pJ, egy memóriafrekvencia során pedig 4 átvitel történik.
+
+\subsubsection{Jelfajták}
+A buszok esetében három jelrendszert különböztetünk meg (\ref{fig:signal}):
+\begin{itemize}
+    \item Föld referenciált - single ended: TTL, LVTTL és SDRAM használja
+    \item Feszültség referenciált: FSB, DDR használja
+    \item Differenciál erősítő mindkét bemenetén jel van: QPI, PCIe, egyéb soros buszok
+\end{itemize}
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{signal}
+    \centering
+    \caption{Buszok jelrendszerei}
+    \label{fig:signal}
+\end{figure}
+Az ábrán balról jobbra egyre kisebb löketű és egyre jobb biztonságú jelek láthatók, ezért az új rendszerek szinte kizárólagosan a differenciált jelet használják.
+Ennek viszont a hátránya a nagyobb teljesítmény igény.
+
+ \subsection{Példa: első generációs 2S EPYC szerver CPU}
+ 2S szervereknél az IFIS (Infinity Fabric Inter-Socket) köti össze a tokokat, minden lapkát lapkát minden lapkával.
+ \begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{if3}
+    \centering
+    \caption{IFIS link felépítése 2S EPYC processzoroknál}
+    \label{fig:if3}
+\end{figure}
+Az IFIS kapcsolatonként 16 vezetékpárból épül fel, amiknek hosszabb távot kell megtennie (>20 mm).
+A nagyobb távolság miatt több zavar probléma léphet fel, ezért itt már áttértek a megbízhatóbb, differenciált átvitelre.
+Ennek a következménye a nagyobb teljesítmény igény: 11 pJ/bit.
+
+\subsection{Második generációs IF}
+Az Infinity Fabric második generációjában növelték az átviteli szélességet 512 bitre, a működést függetleníteték az órafrekvenciától és 27\%-kal csökkentették a teljesítmény igényt.
+
+\section{MCM tokozás}
+Egy tokozás háromféle lehet:
+\begin{itemize}
+    \item 2 dimenziós (horizontális lapka elhelyezés): a lapkák egymás mellé kerülnek, közöttük elektromos kapcsolat áll fent (pl. Intel EMIB, AMD MCM)
+    \item 3 dimenziós (vertikális tokozás): a lapkák egymás fölé kerülnek és itt is megvan az összeköttetés. Előnye a nagyobb sűrűség, hátránya a rosszabb hűtés. (pl. Intel Foveros)
+    \item 2D és 3D kombinációja: Foveros+EMIB
+\end{itemize}
+Az MCM (Multi-Chip Module) egy két dimenziós tokozási eljárás.
+2021 augusztusában az AMD bejelentette, hogy ők is készítenek 3D tokozási eljárást.
+A megoldásnak köszönhetően 192 MB-ra tudják emelni az L3 cache-t (\ref{fig:3d}).
+\begin{figure}[H]
+    \includegraphics[width=0.6\textwidth]{3d}
+    \centering
+    \caption{Az AMD által bejelentett 3D tokozás}
+    \label{fig:3d}
+\end{figure}
+
+\section{A Zen processzorcsalád tagjai}
+A Zen családon belül különböző márkanevekkel látják el az eltérő kategóriák processzorait:
+\begin{itemize}
+    \item mobil és kliens processzorok: Ryzen
+    \item HEDT: Ryzen és Threadripper
+    \item szerverek: EPYC
+\end{itemize}
+A Ryzenen belül sorozatok különülnek el: 3, 5, 7 és 9.
+Ezek a teljesítményre vonatkoznak és a sorozat határozza meg a magszámot is.
+A belépő szinten 4-6 mag, magasabb teljesítményű desktopoknál 16, HEDT-eknél pedig 64 mag jellemző.
+
+A processzorok elkülöníthetők GPU-t tartalmazó (mobil, desktop) és nem tartalmazó (desktop, HEDT, szerver) CPU-kra.
+A GPU-t nem tartalmazó CPU-k több lapkából állnak (kivéve 1. generációs GPU nélküli Ryzenek), a GPU-val szereltek viszont egylapkás SoC-ok.
+
+Tokozás szempontjából eltérnek a desktopok és a mobilok.
+Míg a desktopokat PGA (Pin Grid Array) tokozással látják el, a mobilok BGA (Ball Grid Array) forrasztott tokozást használnak.
+A szerverek és desktopok tokozása fizikailag azonos, de nem kompatibilisek egymással.
+
+A Pro jelzéssel ellátott processzorok biztonsági, megbízhatósági és egyéb, főleg vállalati felhasználásban hasznos funkciót tartalmaznak.
+
+\section{Példa: Zen 3 alapú, GPU nélküli Ryzen 5000}
+A processzor a Vermeer architektúrára épül, 2020 végén jött ki.
+Játékos célokat használ, a frekvencia szorzója nem rögzített.
+Két változata van:
+\begin{itemize}
+    \item 8 magot és két lapkát tartalmazó tartalmazó kisebb verzió (CCD + cIOD)
+    \item három lapkát tartalmazó nagyobb verzió (2xCCD + cIOD)
+\end{itemize}
+Mind AM4 tokozással rendelkeznek és 400 vagy 500-as chipkészlettel működnek.
+A Ryzen 9 5950X vette át elsőnek az Inteltől a teljesítmény koronát, eközben viszonylag olcsók és fogyasztásban is jobbak az Inteleknél.
+
+Benchmarkok alapján az egyszálas, többszálas és valós felhasználási esetekben is kb. 20 év után az AMD a Zen 3 processzorokkal átvette a vezetést az Inteltől.
+
+Jelenleg a Zen 3 alapú AMD processzorok a szerverekben is átvették a vezetést az Inteltől.
