@@ -1,0 +1,37 @@
+\documentclass{report}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[hungarian]{babel}
+\usepackage[a4paper, left=20mm, top=20mm]{geometry}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{algorithmic}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\graphicspath{ {./chap1/media} {./chap2/media} {./chap3/media} {./chap4/media} {./chap5/media} {./chap6/media} {./chap7/media} {./chap8/media} {./chap10/media} }
+
+\title{Számítógép architektúrák alapjai}
+\author{Készítette: Simon Péter \thanks{Hallgatói jegyzet Durczy Levente előadásai alapján}}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\input{chap1/chap1.tex}
+
+\end{document}

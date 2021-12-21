@@ -1,0 +1,96 @@
+% Első előadás
+
+\chapter{Alapfogalmak}
+
+\section{Architektúra fogalma}
+A számítógép architektúra fogalmat először Amdahl, az IBM mérnőke használta először a 360-as család bejelentésekor.
+Definíciója szerint ez az a struktúra, amit a gépi kódú programozónak értenie kell, hogy helyes programot tudjon írni az adott gépre.
+Tehát a regiszterek, memória, utasításkészlet, címzési módok és utasításkódok összessége, mind logikai, mind hardveres szinten.
+
+\section{Számítási modellek}
+A számítási modell a számításra vonatkozó alapelvek egy absztrakciója.
+A számítási modelleket a következő absztrakciós jellemzőkkel írhatjuk le:
+\begin{itemize}
+    \item min hajtjuk végre a számítást (általában adatokon - adat alapú)
+    \item hogyan képezzük le a számítási feladatot
+    \item milyen módon vezéreljük a végrehajtási sorrendet
+\end{itemize}
+
+\subsection{A számítási modell, az architekrúra és a programnyelv kapcsolata}
+Egy számítógép tervezését a számítási modellel kell kezdeni, ami meghatározza, hogy mit szeretnénk csinálni.
+Ehhez szükség van egy specifikációs eszközre, amit a programnyelv képvisel (pl. Neumann modell megvalósítási eszköze a BASIC, Fortran).
+Ezután jön az architektúra, ami a számítási modell implementációs eszköze, a "vas".
+Ez hajtja végre az adott programnyelven definiált feladatokat.
+
+\subsection{Számítási modellek csoportosítása}
+\subsubsection{Számítási modelljük szerint}
+\begin{itemize}
+    \item szekvenciális
+    \item párhuzamos
+\end{itemize}
+
+\subsubsection{Vezérlés meghajtása szerint}
+\begin{itemize}
+    \item vezérlés meghajtott
+    \item adat meghajtott
+    \item igény meghajtott
+\end{itemize}
+
+\subsubsection{Probléma leírása szerint}
+\begin{itemize}
+    \item procedurális
+    \item deklaratív
+\end{itemize}
+
+Első sorban aszerint különböztetjük meg őket, hogy min hajtjuk végre a számítást.
+Az adatalapú modellek:
+\begin{itemize}
+    \item Neumann modell
+    \item adatfolyam modell
+    \item applikatív modell (igénymeghajtott)
+\end{itemize}
+Az adatalapú modelleken kívül léteznek még objektum alapú, predikátum logika alapú, tudás alapú és hibrid modellek.
+A mai processzorokban a Neumann és az adatfolyam modellek keverednek.
+
+\subsection{Adatalapú modellek közös tulajdonságai}
+\begin{itemize}
+    \item az adatok általában típussal rendelkeznek (pl. 16 bit int) - vannak elemi és összetett adattípusok
+    \item a típus meghatározza az adat értelmezési tartományát, értékkészletét és az elvégezhető műveleteket
+\end{itemize}
+
+\subsection{Neumann modell}
+A Neumann-elvű számítógépek a számításokat adatokon hajtják végre, amiket egy változó értékű változókészlet képvisel.
+A végrehajtási sorrend vezérlés meghajtott, tehát van egy statikus utasításszekvencia, amit egy speciális regiszter biztosít (program counter).
+A program counter egy inkrementálódó változó, mindig a végrehajtandó utasításra mutat.
+A végrehajtási sorrendtől vezérlési feladatokat ellátó utasításokkal lehet eltérni (pl. jump, if).
+
+A Neumann elv követelményrendszere előírja változók létrehozását, adatmanipulációs és vezérlés átadási utasítások deklarálását.
+Az ilyen nyelveket hívjuk imperatív (parancs) programnyelveknek (pl. C, Pascal, Assembly).
+
+Ezeket a követelményeket az architektúra kielégíti, pl. lehetővé teszi, hogy a memóriában elhelyezkedő változók korlátlan számban módosíthatók legyenek a program futása során.
+Ezen kívül biztosítja a megfelelő regisztereket az adatoknak és speciális regisztereket mint pl. program counter.
+
+Az adatok és az utasítások a memóriában helyezkednek el.
+A számítási feladat műveletek elemi műveletek sorozataként értelmezhető.
+Egy számítási feladat leképezhető adat manipuláló utasítások sorozatával.
+Az adat manipuláló utasítások az utasítások sorrendjében vannak végrehajtva, ezért ez egy vezérlés meghajtott modell.
+A vezérlést a program counter biztosítja, a sorrendet a programozó határozza meg.
+Az explicit vezérlés átadó utasításokkal lehet eltérni az implicit szekvenciától.
+
+Következmények:
+\begin{itemize}
+    \item előzmény érzékenység: mivel az adatok változhatnak bármikor a végrehajtás során, a végrehajtás sorrendje nem mindegy
+    \item alapvetően szekvenciális végrehajtást biztosít
+    \item egyszerűen implementálható
+    \item az adatmanipuláló utasítások nem szándékos állapotmódosulást okozhatnak (pl. overflow) - ezeket mellékhatásoknak hívjuk, kezelni kell őket
+\end{itemize}
+
+\subsection{Adatfolyam modell}
+A számítást itt is adatokon hajtjuk végre, de:
+\begin{itemize}
+    \item az adatokat bemenő adathalmaz képviseli
+    \item egyszeres értékadás lehetséges
+    \item a megoldandó feladatot adatfolyam gráffal és input adatok halmazával képezzük le
+    \item szakosodott végrehajtó egységeket használ
+    \item a végrehajtást az adat vezérli - adatvezérelt, azaz az adat rendelkezésre állásakor azonnal működésbe lép a végrehajtó egység
+\end{itemize}
