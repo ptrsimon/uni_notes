@@ -1,0 +1,77 @@
+% Második és harmadik előadás
+
+\chapter{Adattér}
+
+\section{Az adattér fogalma}
+Az adattér egy olyan tér, mely biztosítja az adatok tárolását oly módon, hogy azok a CPU által közvetlenül manipulálhatók legyenek.
+Az adattér közvetlenül címezhető a processzor által.
+
+\section{Típusai}
+Az adattér két típusát különböztetjük meg:
+\begin{itemize}
+    \item memóriatér
+    \item regisztertér
+\end{itemize}
+
+\section{Memóriatér}
+A memóriateret leginkább a mérete jellemzi.
+A címzéséhez címbuszra van szükség, ennek szélessége meghatározza a memóriatér maximális méretét.
+A címtérnél megkülönböztetjük a modell címterét és a valós címteret, mivel az adott installáció nem feltétlen éri el az elméleti modell méretét.
+
+\subsection{Virtuális memória}
+A 60-as években a kis memóriák és az elméleti és valós memóriatér eltérő mérete miatt megjelent a virtuális memória.
+Alap koncepciói:
+\begin{itemize}
+    \item két különböző memóriatér létezik: amit a programozó lát (virtuális memória) és a CPU által látott fizikai memória
+    \item létezik olyan, a felhasználó számára transzparens folyamat, amely a program futása közben az éppen nem használt adatokat a valós memóriából a virtuális memóriába mozgatja, majd szükség esetén visszateszi
+    \item létezik olyan (egyirányú) folyamat, amely a virtuális memória címeket dinamikusan, tehát futási időben valós címekké alakítja
+\end{itemize}
+
+\section{Regisztertér}
+A regisztertér az adattér nagy teljesítményű, általában viszonylag kis része.
+Általában nem része a címtérnek.
+
+\subsection{Típusai}
+\begin{itemize}
+    \item egyszerű regiszterkészlet
+    \item adattípusonként különböző regiszterek
+    \item többszörös regiszterkészlet
+\end{itemize}
+
+\subsection{Egyszerű regiszterkészlet}
+Az egyszerű regiszterkészlet típusai:
+\begin{itemize}
+    \item egyetlen regiszter (akkumulátor), hátránya, hogy nagyon lassú
+    \item több, dedikált adatregiszter
+    \item univerzális regiszterkészlet, jelentős teljesítmény növekedést eredményezett, a programozó szabadon felhasználhatja a regisztereket (pl. a gyakran használt változók folyamatosan a regiszterben maradhattak)
+    \item stack regiszterek
+\end{itemize}
+
+\subsubsection{Stack regiszterek}
+A stack regisztereknél egy stack pointer (SP) mutat a "zsák" tetejére (mindig az utoljára betöltött adat).
+Előnye, hogy nem kell címezni, így egyszerű, rövid utasításokkal kezelhető és gyors.
+Hátránya viszont, hogy mindig csak a tetejéhez férünk hozzá, így az operandus kiolvasás csak szekvenciálisan történhet.
+A szekvenciális kiolvasás lassú, szűk keresztmetszetet jelent sok adatnál.
+
+\subsection{Adattípusonként különböző regiszterek}
+Itt különféle adattípusokhoz különféle regiszterek állank rendelkezésre, elsősorban lebegőpontos adatoknál.
+A lebegőpontos regisztereknél külön van bontva a mantissza és a karakterisztika, mivel mindkettőn műveletet kell végezni, így lehetőséget ad a párhuzamosításra a külön tárolás.
+Az Intel 1998-ban bevezette még a SIMD adattípust, amit multimédiás alkalmazásokhoz használtak.
+
+\subsection{Többszörös regiszterkészlet}
+Ez a legfejlettebb megoldás, egymásba ágyazott eljárások gyorsítására szolgál.
+Ehhez szükséges a kontextus fogalmának bevezetése.
+A kontextus a regisztertér állapota az állapottérrel együtt.
+
+Az eljárások közötti váltásoknál szükséges a kontextusok közötti váltás, amit a kontextuskapcsoló végez.
+Ha a kontextusok közötti váltásnál a kontextust a memóriatérből kell betölteni, nagyon lassú lesz, ha viszont regiszterek között kell csak váltani, akkor gyors.
+Ezért vezettek be több regiszterkészletet, a cél minden kontextus számára különálló regiszterkészlet biztosítása.
+A programozó ezek közül csak egyet lát, a kontextus váltásokat a processzor kezeli.
+A megvalósításhoz szükség van még egy általános regiszterkészletre, ami a regiszterek közti paraméter átadást biztosítja.
+
+\subsubsection{Típusai}
+\begin{itemize}
+    \item több, egymástól független regiszterkészlet, hátránya, hogy a paraméter átadás csak az operatív táron keresztül történhet, ami lassítja az eljárást
+    \item átfedő regiszterkészlet, egymásba ágyazott eljárásokhoz dolgozták ki, lényege, hogy egy regisztert három részre bontottak: ins, locals, outs. Úgy alakították ki, hogy az egyik regiszter kimenő területe ugyanazon a címen helyezkedik el, mint a másik bemenője, így nagyon könnyű az operátor átadás. Hátránya, hogy merev a struktúra és hogy a regiszterkészletek száma korlátozza a regisztertérben tartható kontextusokat.
+    \item stack cache: 1982-ben vezették be, a mai processzorokban is hasonló struktúrákat alkalmaznak. A stack és a közvetlen elérésű cache kombinálása. Kezelése a compiler feladata, ami minden eljáráshoz hozzárendel egy regiszterkészletet. A hozzárendelt regiszterkészlet az aktiválási rekord, aminek az első elemére a stack pointer mutat. A regiszterek nem csak a stack pointeren kersztül érhetők el, hanem közvetlenül is, a displacement pointerrel. Bizonyos korlátok között az aktiválási rekord bármilyen hosszú lehet, tehát a kiosztás rugalmas. Előnye, hogy nincsenek üres helyek, így nincsenek fölöslegesen lefoglalt regiszterek és nincs túlcsordulás se.
+\end{itemize}

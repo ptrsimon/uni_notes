@@ -1,4 +1,4 @@
-% Első előadás
+% Első és második előadás
 
 \chapter{Alapfogalmak}
 
@@ -90,7 +90,60 @@ A számítást itt is adatokon hajtjuk végre, de:
 \begin{itemize}
     \item az adatokat bemenő adathalmaz képviseli
     \item egyszeres értékadás lehetséges
-    \item a megoldandó feladatot adatfolyam gráffal és input adatok halmazával képezzük le
+    \item a megoldandó feladatot adatfolyam gráffal és input adatok halmazával képezzük le (a gráfban a csomópontok a szakosodott végrehajtó egységek)
     \item szakosodott végrehajtó egységeket használ
-    \item a végrehajtást az adat vezérli - adatvezérelt, azaz az adat rendelkezésre állásakor azonnal működésbe lép a végrehajtó egység
+    \item a végrehajtást az adat vezérli - adatvezérelt, azaz a szükséges adatok rendelkezésre állásakor azonnal működésbe lép a végrehajtó egység
+    \item az adat meghajtott program utasításai semmilyen szempontból nem rendezettek
+    \item az adatokat utasításon belül tároljuk és nem az operatív tárban
+    \item magas a kommunikációs és szinkronizációs igénye
 \end{itemize}
+
+\subsection{Applikatív modell}
+A számítási feladatot egy komplex függvény formájában adjuk meg.
+Ez is adatalapú modell, de deklaratív jellegű, tehát valamennyi, az adott probléma megoldásához szükséges tényt és relációt deklarálunk.
+Mindezt egy végrehajtó mechanizmus (a függvény) feldolgozza.
+A vezérlés igény meghajtott (lazy, lusta modell).
+
+\section{Az architektúráról bővebben}
+A 70-es években Bell és Newell kibővítette az architektúra definícióját és négy szintet határoztak meg:
+\begin{itemize}
+    \item PMS - processor, memory, switches: a számítógépek globális leírása
+    \item programozási szint:
+    \begin{itemize}
+        \item magas szint
+        \item alacsony szint
+    \end{itemize}
+    \item logikai tervezési szint
+    \item áramköri szint
+\end{itemize}
+
+Az architektúra másik megfogalmazásban a külső jellemzők, a belső felépítés és a működés együttesét jelenti.
+Megkülönböztetünk logikai és fizikai architektúrát, valamint ezeken belül processzor és számítógép szinteket.
+
+\subsection{ISA}
+A processzor szintű logikai architektúra az ISA - Instruction Set Architecture.
+Ez írja le az utasításkészletet, pl. x86.
+Az ISA komponensei:
+\begin{itemize}
+    \item adattér
+    \item adatmanipulációs fa
+    \item állapottér
+    \item állapot műveletek
+\end{itemize}
+
+\subsection{Fizikai architektúra}
+A számítógép szintű fizikai architektúra elemei:
+\begin{itemize}
+    \item processzor
+    \item memória
+    \item buszrendszer
+\end{itemize}
+
+A processzor szintű fizikai architektúra négy részre bontható:
+\begin{itemize}
+    \item műveletvégző egység (ALU)
+    \item vezérlő
+    \item I/O
+    \item megszakításrendszer
+\end{itemize}
+Az I/O és a megszakításrendszer a más rendszerekkel összekapcsoló illesztő eszközök.
