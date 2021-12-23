@@ -1,4 +1,4 @@
-% Harmadik és negyedik előadás
+% Harmadik, negyedik és ötödik előadás
 
 \chapter{Adatmanipulációs fa}
 
@@ -213,6 +213,57 @@ A CPU címtere nagyon nagy (4-64 TB), így abszolút címzéssel nagyon nagy cí
 Ezért inkább a relatív címzést használják.
 Bázis címnek választható pl. a PC, a stack teteje, valamilyen index regiszter, stb.
 
-\subsection{Az index regiszter}
+\subsection{Az indexelés és az index regiszter}
 Megkülönböztetünk egyedi és blokkos címzést, jellemzően blokkokat címzünk és töltünk be a gyorsítótárba.
-Ehhez szükség van egy index regiszterre.
+Ehhez szükség van egy index regiszterre, amiben az eltolás tárolódik.
+Több dimenziós blokkoknál több index regiszter van használatban.
+
+\section{Utasítás kód}
+Az adatmanipulációs fa legalsó szintje, gépi reprezentációnként különböző.
+
+\section{Állapottér}
+Az állapottér olyan, programból látható és nem látható (program transzparens) tárolókból áll, amelyek az adott programra vonatkozó állapotinformációkat hordozzák.
+A program transzparens információk a rendszerfunkciókhoz szükségesek, mint pl. virtuális memória kezelés és a megszakításkezelés.
+Az állapottér tehát felosztható:
+\begin{itemize}
+    \item transzparens
+    \begin{itemize}
+        \item virtuális memória kezelés
+        \item megszakításkezelés
+        \item veremkezelés
+    \end{itemize}
+    \item látható
+    \begin{itemize}
+        \item PC
+        \item státusz indikátorok (flagek)
+        \begin{itemize}
+            \item CC (Condition Code, IBM gépeknél): két bit, különböző állapotinfókat tartalmaz
+            \item univerzális állapotjelzők pl. carry, zero
+            \item adattípusonként különböző állapotjelzők pl. denormalizált szám vagy érvénytelen művelet (minden regiszterkészlethez definiáltak)
+        \end{itemize}
+        \item indexelés
+        \item címzési módok
+        \item debug
+    \end{itemize}
+\end{itemize}
+
+\subsection{Flagek}
+Olyan kivételes események figyelésére és vezérlésére szolgálnak, melyek a program futása közben általánosságban jelenhetnek meg.
+Ilyen pl. a túlcsordulás vagy a nullával való osztás.
+
+\subsection{Állapot műveletek}
+Az állapotjelzőket speciális utasításokkal lehet manipulálni.
+Állapotműveletek PC esetén:
+\begin{itemize}
+    \item inkrementálás
+    \item dekrementálás
+    \item felülírás (pl. egy utasításból vett címmel, ugróutasítással)
+\end{itemize}
+Flagek esetén:
+\begin{itemize}
+    \item mentés
+    \item beállítás
+    \item reset
+    \item load
+    \item clear
+\end{itemize}
