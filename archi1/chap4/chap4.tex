@@ -1,4 +1,4 @@
-% Ötödik előadás
+% Ötödik és hatodik előadás
 
 \chapter{Processzor szintű fizikai architektúra}
 
@@ -147,3 +147,90 @@ Az igazságtáblát felírva és a logikai függvényeket egyszerűsítve a köv
     \label{fig:teljesosszeegyszeruc}
 \end{figure}
 Ezzel a művelet már két óraciklus alatt is elvégezhető, azaz a teljesítmény 33\%-kal növekszik.
+
+\subsubsection{n-bites összeadó}
+A gyakorlatban viszont általában nem biteket, hanem bitsorozatokat kell összeadni.
+Ezeknek a bitsorozatoknak a tárolása regiszterekben történik (byte, szó, duplaszó).
+A feladat tehát 2 db n-bites regiszter összeadása.
+
+Az első ilyen megoldás az n-bites soros összeadó volt.
+Ez a különböző helyiértékeken lévő biteket egymás után, külön-külön adja össze.
+A carry-t is figyelembe veszi, ezt a flip-flopok tárolják.
+Képes két különböző hosszú szám összeadására, ilyenkor a rövidebb számot automatikusan kiegészíti 0 helyiértékekkel.
+A megvalósításhoz egy darab teljes összeadót használ, valamint bevezették a léptető regisztert.
+
+A B léptető regiszter kimenete rá van vezetve a bemenetére.
+A teljes összeadó bemenete a két léptető regiszter kimenetére csatlakozik.
+Így a léptető regiszter kimenete minden alkalommal bekerül a teljes összeadóba és a B léptető regiszter bemenetére is.
+Ekkor minden helyiérték egyel jobbra lép, a B regiszter tartalma változatlan marad, az A regiszterbe pedig bekerül az összeadás ereménye az összeadó kimenetéről.
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{lepteto}
+    \centering
+    \caption{n-bites soros összeadó és a léptető regiszterek}
+    \label{fig:lepteto}
+\end{figure}
+A carry kezeléséhez a carry bementet először egy OR kapun kell átvezetni, így az előző összeadás carry-je és a bitenkénti összeadás carry-je is figyelembe van véve.
+A tároló egység, a flip-flop feladata, hogy a carry bemenetet csak az első összeadásnál vegye figyelembe.
+
+Ezzel a módszerrel az összeadás megtörtént, de a soros végrehajtás miatt viszonylag lassú.
+Gyorsítási lehetőség az összeadás párhuzamosítása.
+Ehhez n darab 1 bites összeadóra van szükség, amik bemeneteire a két bemeneti regiszter megfelelő bitjei vannak rákötve.
+A teljes párhuzamos végrehajtást a carry bitek akadályozzák, mivel az n-edik bit előállításához szükség van az n-1-edik carry bit előállítására.
+A végrehajtási idő tehát nem sokat javult, viszont amennyiben nincs carry, úgy nagyon gyorsan előáll az eredmény.
+Tehát a végrehajtási idő hullámzó, a carry-től függ (ripple carry adder).
+
+A további gyorsítás szimultán átvitelképzéssel lehetséges (carry lookahead - carry előrejelzés, más néven rekurzív módszer).
+A carry kimenetet adó logikai függvény vizsgálatával kiderül, hogy a végeredmény nem függ a bitenkénti carrytől.
+Az AB-t nevezzük generate-nek (G), az A+B-t propagate-nek (P).
+Ezt felhasználva 3 kapu segítségével előállítható az összes carry.
+Az ezt kiszámoló áramkör neve a CLA, azaz carry lookahead.
+A CLA bemenete az A és B és a bemeneti carry.
+Az összeadót úgy módosítjuk, hogy előállítsa P-t és G-t.
+A teljes összeadó carry kimenetét nem használjuk, hanem azt a CLA állítja elő.
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{cla}
+    \centering
+    \caption{A CLA-t használó összeadó felépítése}
+    \label{fig:cla}
+\end{figure}
+Ezzel az összeadás 3 ciklus segítségével megvalósítható.
+Korlátja, hogy egy OR kapu általában max 8 bemenetet kezel, tehát egy 32 bites összeadóhoz 4 db CLA-ra van szükség.
+Ezt segíthetjük egy plusz CLA-val, ami a CLA-k bemenő carry-jeit állítja elő.
+
+Az összes mai összeadó ilyen rekurzív módszerek szerint működik.
+
+\subsubsection{Szorzás megvalósítása}
+A szorzás is összeadások sorozatára vezethető vissza, így az előző módszerekkel megvalósítható.
+Sok szorzásnál ez lassú, így itt is gyorsításra, egyszerűsítésre van szükség.
+
+Az egyszerűsítéshez felhasználható az összeadás, invertálás és léptetés.
+Régen ez gépi kódból történt, de manapság szakosodott műveletvégző egységek segítik ezeket a műveleteket.
+
+Egyik egyszerűsítési lehetőség a gyűjtő regiszter és a léptetés használata.
+A gyűjtőt a művelet előtt nullázzuk.
+
+A szorzás eredménye általában több bit helyet foglal, tehát nem valószínű, hogy belefér a forrásregiszterbe.
+Kettes számrendszerben ha A szám n bit hosszú, B pedig m bit hosszú, akkor elmondható, hogy $A*B <= m+n$.
+Két 8 bites szám esetén pl. az eredmény 16 bit hosszú lehet.
+
+Gyorsítási lehetőségek:
+\begin{itemize}
+    \item bitcsoporttal történő szorzás: pl. $7*9=63$, azaz $0111*1001$ szorzásánál először 10-al, majd 01-el szorzunk. Ha a bitcsoport 00, a szorzandót nem kell a gyűjtőhöz adni, csak 2-t léptetünk balra. Ha 01, a gyűjtőhöz a szorzandó egyszeresét adjuk hozzá és kettőt léptetünk balra. 10-nál a kétszeresét adjuk hozzá, azaz balra léptetünk egyet, hozzáadjuk, majd balra léptetünk kettőt (ha folytatódik a szorzás). 11-nél a 3-szorosát kell hozzáadni, majd kettőt léptetni balra (ehhez általában a 4-szeresét adjuk hozzá és kivonjuk az egyszeresét).
+    \item Booth-féle algoritmus: probléma, hogy ha a szorzóban sok 1-es van, akkor lassú a szorzás. Ennek a gyorsításához a szorzóhoz közeli számmal szorzunk, majd a különbséget kivonjuk. Pl. 62-vel szorzásnál 64-el szorzunk (6 léptetés balra), majd kivonjuk a szorzandó kétszeresét.
+\end{itemize}
+
+\subsubsection{Osztás}
+Az osztás igényli a legtöbb időt, mivel bonyolult művelet.
+Különbség, hogy itt két kimenet van, az eredmény és a maradék, valamint kivételek is felléphetnek.
+
+\subsubsection{Lebegőpontos számok}
+A lebegőpontos számok szükségesek:
+\begin{itemize}
+    \item a fixpontos számok értelmezési tartománya viszonylag kicsi
+    \item fixpontos számoknál a pontosság is viszonylag kicsi
+\end{itemize}
+
+A lebegőpontos számokat 1985-ben szabványosították (IEE754).
+Formájuk: $M*r^k$, ahol M a mantissza, r a radix és k a karakterisztika.
+Fontos, hogy r megegyezzen az M számrendszerének alapjával.
+Az ábrázolásuk normalizált formátumban történik.
