@@ -1,0 +1,22 @@
+% Tizedik előadás
+
+\chapter{I/O rendszer}
+
+A CPU-t és a perifériákat összekötő egységet hívjuk I/O egységnek.
+Például egy billentyűzet csatlakozásánál az alaplapi USB vezérlő számít I/O egységnek.
+
+\section{Fejlődésük}
+\begin{enumerate}
+    \item A CPU közvetlenül vezérli a perifériát (megszakítás nélküli programozott IO - wait for flag)
+    \item Egy I/O modul kerül kialakításra
+    \begin{itemize}
+        \item megszakítás nélkül, wait for flag
+        \item megszakításos vezérlés
+    \end{itemize}
+    \item DMA segítségével közvetlen hozzáférés a perifériához
+    \item IO csatorna - lassabb perifériák számára. IO-ra specializált utasításkészlettel rendelkezik és a központi operatív tárat használja
+    \item IO processzor - az IO csatorna továbbfejlesztése, saját működésre képes egység, saját memóriával
+\end{enumerate}
+A megszakítás nélküli vezérlés nagy hátránya, hogy az utasítás kiküldése után a CPU egy ciklusban várakozik a periféria válaszára, és amíg ez meg nem érkezett, blokkolta a további műveleteket.
+Ezért jelentek meg a megszakításrendszerek, a processzor az utasítás kiadása után más feladatokkal foglalkozott, majd az IO egység megszakítással jelzi a művelet befejezését.
+Következmény, hogy nő a teljesítmény.

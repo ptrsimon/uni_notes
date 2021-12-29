@@ -1,0 +1,96 @@
+% Tizedik előadás
+
+\chapter{Memóriák}
+
+A memóriák nagyságrendekkel gyorsabbak a merevlemezeknél, de jelentősen lassabbak a gyorsítótáraknál.
+
+Csoportosításuk:
+\begin{itemize}
+    \item írható-olvasható (RAM)
+    \begin{itemize}
+        \item DRAM (operatív tár)
+        \item SRAM (gyorsítótárak)
+    \end{itemize}
+    \item főképp csak olvasható (CMOS)
+    \item csak olvasható (ROM)
+\end{itemize}
+
+\section{ROM}
+Ma általában flash tárolóval oldják meg, tartalmuk maradandó.
+
+\section{RAM}
+Random Access Memory, tartalma nem maradandó.
+
+\subsection{SRAM}
+Statikus memória, a tápfeszültség megszűnéséig tárolja az adatot.
+Félvezető, flip-flop memóriában tárolja az adatot, általában regisztereknek és cache-nek használják.
+Jellemzői:
+\begin{itemize}
+    \item energiatakarékos
+    \item gyors
+    \item drága
+    \item az adatokat nem kell frissíteni
+\end{itemize}
+A dinamikus RAM-nál nagyságrendekkel gyorsabb.
+
+\subsection{DRAM}
+Néhány pikofarados kondenzátorokból és 1 tranzisztorból épül fel egy cella.
+Ez egy idő után kisül, így az adatot frissíteni kell.
+Jellemzői:
+\begin{itemize}
+    \item olcsó
+    \item alacsony fogyasztás
+    \item kis helyigény
+\end{itemize}
+
+\subsubsection{Típusai}
+\begin{itemize}
+    \item klasszikus, aszinkron DRAM
+    \item szinkron DRAM
+    \begin{itemize}
+        \item SDR - Single Data Rate: az órajelnek csak a felmenő élén történik átvitel
+        \item DDR - Double Data Rate: felmenő és lemenő élre is történik adatátvitel
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Felépítése}
+A memória több logikai részre - bankokra - van felépítve, hogy egyszerre több memória műveletet is végre tudjon hajtani.
+Olvasása futószalag elven történik, tehát a memória művelet parancs kiadása után az eredmény csak több óraciklus után jelenik meg.
+Ebből fakad a késleltetés, azaz a latency, ami a memória egy fontos teljesítmény paramétere.
+
+\subsection{Prefetch eljárás}
+A prefetch eljárás fajtája megmutatja, hogy adott óraciklus alatt hány bit tölthető az IO pufferbe.
+2n eljárásnál pl. ez a szám 2.
+
+\subsubsection{Fejlődése}
+\begin{itemize}
+    \item DDR-400: 2n prefetch
+    \item DDR2: alacsonyabb órafrekvencia, alacsonyabb fogyasztás, 4n prefetch
+    \item DDR3: 8n prefetch
+    \item DDR4: ugyanolyan órafrekvencia mellett nagyobb a késleltetés, mint DDR3-nál. Ugyanúgy 8n prefetch-t használ, viszont létrehoztak bankcsoportokat. Megjelenik a CRC és a chipenkénti extra paritás, így növekedett a stabilitás.
+\end{itemize}
+
+\subsubsection{Az olvasás lépései}
+\begin{itemize}
+    \item bank megnyitása
+    \item oszlopblokkok olvasása a megnyitott sorból
+    \item bank zárása
+    \item legalább tRP várakozás, mielőtt a bankot újra megnyithatnánk
+\end{itemize}
+Tehát a legjobb az, ha a megnyitott bankok soraiból olvasunk.
+
+\section{Fejlődési trendek}
+\begin{itemize}
+    \item nő az órafrekvencia és a sávszélesség
+    \item nő a prefetch
+    \item csökken a lapkaméret és a tápfeszültség
+\end{itemize}
+
+\section{DIMM-ek}
+\begin{itemize}
+    \item 64 bites szervezés: 168-284 pin
+    \item registered DIMM: a DRAM chipek és a memóriasín közé helyeznek egy regisztert (ami minden műveletet pufferel), így kisebb elektromos terhelést jelent a vezérlő számára és több modul esetén nagyobb a stabilitás, ezért elsősorban szerverekhez használják.
+    \item ECC chip: Error Control Coding, míg a paritás bit segítségével a memória felfedezheti az egyszeres hibát, viszont hibajavításra nem képes, az ECC chip segítségével javítani is tudja az adatot, valamint két bit hibát is képes felismerni.
+    \item PLL chip: fázis zárt hurok, az órajel elcsúszás mentesítésre szolgál, ezt is elsősorban szerverekben használják
+\end{itemize}
+
