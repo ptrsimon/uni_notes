@@ -1,0 +1,56 @@
+% Nyolcadik előadás
+
+\chapter{Buszrendszer}
+
+A buszrendszer egységek közötti kommunikációra szolgál (pl. CPU-MEM-perifériák), a kommunikáció infrastrukturális része.
+Egy történeti fejlődés eredménye, az adatkommunikációs megoldások közül ez bizonyult a legjobbnak.
+
+\section{Jellemzői}
+\begin{itemize}
+    \item az eszközök kizárólag ezen keresztül kommunikálnak
+    \item egy buszrendszerre általában egyszerre több egység kapcsolódik \textrightarrow meg kell oldani az adatátvitelben részt vevő eszközök kijelölését, meg kell határozni az átvitel irányát és meg kell oldani az összehangolást és szinkronizálást.
+    \item a felsorolt problémák megoldására a legfontosabb a szabványosítás - szabványos jelhasználat, vezetékkiosztás
+    \item fontos tulajdonsága a sebesség, hogy az adatkommunikáció ne jelentsen szűk keresztmetszetet
+    \item a buszrendszer transzparens - a rendszer kezeli, a felhasználó számára nem látható
+\end{itemize}
+
+\section{Csoportosítása}
+\begin{itemize}
+    \item átvitel iránya szerint
+    \item átvitt tartalom szerint
+    \item átvitel jellege szerint
+    \item összekapcsolt területek alapján
+    \item átvitel módja szerint
+\end{itemize}
+
+\subsection{Átvitel módja szerint}
+\begin{itemize}
+    \item soros
+    \item párhuzamos
+\end{itemize}
+
+\subsection{Átvitel iránya szerint}
+\begin{itemize}
+    \item szimplex (csak egy irányba mehet az adat, pl. címbusz)
+    \item félduplex (egyszerre csak egy irányban közlekedik az adat)
+    \item duplex (egyszerre két irányba mehet az adat, pl. adatbuszok)
+\end{itemize}
+
+\subsection{Átvitel jellege szerint}
+\begin{itemize}
+    \item dedikált - minden mindennel össze van kötve pl. Intel QuickPath Interconnect
+    \item shared (osztott)
+\end{itemize}
+A megosztott busz egyszerűbb felépítésű, olcsóbb és skálázhatóbb (nem kell mindent mindennel összekötni), de buszvezérlő utasításokra van szükség az ütközések elkerülésére.
+Ehhez buszvezérlő vonalakra van szükség.
+Hátránya az osztott buszoknak, hogy viszonylag lassúak, bonyolult a vezérlésük és meghibásodás esetén több eszköz kieshet.
+
+\subsection{Átvitt tartalom szerint}
+\begin{itemize}
+    \item adatbusz
+    \item címbusz
+    \item vezérlőbusz
+\end{itemize}
+
+\subsubsection{Címbusz}
+Ezen a vezetékkötegen áramlik az eszközök címzésére szolgáló adat.
