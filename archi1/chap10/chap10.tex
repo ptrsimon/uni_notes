@@ -1,0 +1,107 @@
+% Tizenkettedik és tizenharmadik előadás
+
+\chapter{Megszakítások}
+
+A megszakítás célja a feldolgozás vagy végrehajtás közben váratlannak tekinthető események kezelése.
+Nem csak a reagálás a cél ezekre az eseményekre, hanem a folyamatosan változó körülmények között az optimális működés biztosítása is.
+
+\section{Általános folyamata}
+Minden utasítás végrehajtás után van egy utasítás töréspont, amikor a processzor megvizsgálja, hogy érkezett-e megszakítás.
+Ha a válasz nem, akkor a követkző utasítás következik.
+Ha viszont igen, a processzor megvizsgálja, hogy a megszakítás elfogadható-e.
+Amennyiben nem elfogadható, folytatja a következő utasítással, viszont ha igen, akkor megvizsgálja az adott megszakítást, menti az adott állapot kontextusát, kiszolgálja a megszakítást, visszatölti a mentett kontextust és jön a következő utasítás.
+
+Fontos szempont, hogy megszakítás esetén az adott folyamat kontextusát tárolni kell.
+Ezután be kell tölteni a megszakítási rutin állapotát, végre kell hajtani a megszakítást és végül vissza kell adni a vezérlést.
+
+\section{Kialakulása}
+Kezdetben az IO adatátvitel gyorsítására alkalmazták a megszakításokat.
+
+\section{Megszakítási okok prioritási sorrendben}
+\begin{enumerate}
+    \item Géphibák: hibafigyelő áramkörök jelzései - általában nem letilthatók (pl. hőmérséklet szenzorok jelzései, ventillátor meghibásodása, paritás ellenőrzés, watchdog). Egy részük hibajelző kódok segítségével kommunikál.
+    \item IO források: IO befejezés, IO kezdeményezés, minden perifériákkal kapcsolatos állapotjelzés
+    \item Külső források: reset gomb, hálózati kommunikáció
+    \item Programozási (szoftveres) források
+    \begin{itemize}
+        \item szándékos: pl. rendszerhívás
+        \item hibakezelés: mindig valamilyen utasítás végrehajtása során alakul ki 
+    \end{itemize}
+\end{enumerate}
+
+\section{Szoftveres megszakítások}
+Hibákból származó programozási megszakítások lehetnek:
+\begin{itemize}
+    \item memóriavédelem megsértése (több, saját memóriaterülettel rendelkező program esetén)
+    \item tényleges tárkapacitás túlcímzése
+    \item címzési előírások megsértése pl. 32 bites címek esetén csak minden negyedik byte címezhető
+    \item aritmetikai, logikai végrehajtás közben fellépő hibák (underflow, overflow, tartomány túllépése, nullával osztás...)
+\end{itemize}
+
+\section{Megszakítások csoportosítása}
+Megkülönböztetünk szinkron és aszinkron megszakításokat.
+A szinkron megszakítás egy adott program ugyanazon paramétereivel történő futtatása során mindig ugyanott jelentkezik (várható megszakítás).
+Az aszinkron megszakítások ezzel szemben viszont véletlenszerűen lépnek fel (nem várható megszakítás, pl. hardverhiba).
+
+Csoportosíthatjuk a megszakításokat még aszerint is, hogy az utasítások végrehajtása között (pl. utasítás végrehajtásának eredménye képpen) vagy közben lépnek fel.
+Utasítások között felléphetnek pl. túlcsordulási hibák.
+Ezek kezelése rögtön az utasítás után elkezdődhet.
+A program folytatása a megszakítás kezelésének eredményétől függ.
+
+Az utasítások közben felmerülő megszakítások nincsenek szinkronban a végrehajtási ciklussal.
+Ilyenek pl. a hardvermegszakítások.
+Ezek kezelése is az utasítás után kezdődhet meg.
+
+A megszakításokat feloszthatjuk még aszerint is, hogy a programozó kérte, vagy nem kérte az adott megszakítást.
+
+A megszakítás után a megszakított program folytatódhat, vagy be is fejeződhet.
+
+További csoportosítás a maszkolható és nem maszkolható megszakítások.
+A maszkolható megszakítások letilthatók.
+Tipikus nem maszkolható megszakítások a hardverhibákat jelzők.
+
+\section{Megszakítás kiszolgálása}
+\begin{enumerate}
+    \item Előkészítés: ha valamelyik egység megszakítás kérést bocsát ki, aktiválódik az INTR vezérlővonal (interupt request)
+    \item Az első kérdés, hogy a megszakítás elfogadható-e. Régen a megszakítás vonalon csak egyszintű megszakítás lehetett, de ma már ez egy megszakítás áramkör, ami fogadja a bejövő megszakításokat és tudja kezelni a prioritásokat. Ez az áramkör van rákötve a CPU interrupt bementére, feladata eldönteni, hogy melyik megszakítás legyen kiszolgálva.
+    \item A megszakítás érvényre juthat, ha:
+    \begin{enumerate}
+        \item az aktuális folyamat (program vagy másik megszakítás) megszakítható
+        \item megfelelő a prioritás nagysága
+        \item az adott megszakítás nincs maszkolva, azaz letiltva
+    \end{enumerate}
+    \item Ha a megszakítást elfogadta a megszakítás áramkör, az INTACK vezérlővonallal jelzi az elfogadást és aktiválja az INTR vonalat
+\end{enumerate}
+
+\subsection{A processzor feladata}
+\begin{itemize}
+    \item eltárolja az aktuális kontextust egy programtól független tárolóban
+    \item betölti a PC-be a megszakítást kezelő utasítások kezdőpontját
+\end{itemize}
+
+\section{Megszakításrendszerek szintjei}
+\begin{itemize}
+    \item egyszintű
+    \item többszintű
+    \begin{itemize}
+        \item egyvonalú
+        \item többvonalú
+    \end{itemize}
+\end{itemize}
+
+\subsection{Egyszintű megszakítási rendszer}
+Egyszintű megszakításoknál addig nem kezdődhet másik megszakítás, amíg vissza nem térünk a normál állapotba.
+Tehát ilyenkor a megszakítások nem megszakíthatók, a megszakítások egymás után hajtódnak végre.
+Hátrány, hogy a magasabb prioritású megszakításoknál is előfordulhat, hogy várakozniuk kell.
+
+\subsection{Egyvonalú, többszintű megszakítási rendszer}
+Ennél a megszakítások is megszakíthatók, a megszakítások fontossági sorrendben futnak le.
+Ha egy megszakítás futása során egy magasabb prioritású megszakítás érkezik, az alacsonyabb prioritású megszakítást megszakítja a rendszer és elkezdi végrehajtani a magasabb prioritásút.
+A rendszer problémája, hogy a valóságban sok megszakítás van, ezért nem lehet minden megszakításhoz különböző prioritást rendelni.
+
+\subsection{Többszintű, többvonalú megszakítási rendszer}
+Fejlesztés az egyvonalú rendszerekhez képest, hogy megszakítási osztályokat hoznak létre és ezekhez az osztályokhoz rendelnek prioritási szinteket.
+Az osztályokon belül a megszakítástípusok egyszintű prioritást használnak.
+
+\section{Összefoglalás}
+A megszakítások lényege, hogy csak akkor terhelje a processzort, amikor az szükséges, de akkor minnél hamarabb alkalmazkodni tudjon a rendszer a felmerült körülményhez.

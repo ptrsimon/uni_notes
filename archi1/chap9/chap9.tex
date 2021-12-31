@@ -1,4 +1,4 @@
-% Tizedik és tizenegyedik előadás
+% Tizedik, tizenegyedik és tizenkettedik előadás
 
 \chapter{I/O rendszer}
 
@@ -124,13 +124,13 @@ A DMA saját regiszterekkel rendelkezik, pl. IO cím, IO data, DC, saját belső
 Műdödési lépései:
 \begin{enumerate}
     \item felparaméterezés: a processzor betölti a szükséges adatokat a DMA-ba (ez programozott IO-val történik). Az átadott paraméterek: írási/olvasási műveletet kell végrehajtani (irány), az IO egység címe, a memóriacím kezdőértéke (IO address regiszter), átvivendő adat jellege (pl. byte, félszó, szó), olvasandó/írandó egységek száma (DC-be), átvitel módja (blokkos/cikluslopásos), DMA csatornáihoz rendelt prioritási érték, résztvevő egységek (pl. mem-mem, IO-mem, IO-IO)
-    \item második lépésbel eltér a blokkos adatátvitel és a cikluslopásos:
+    \item második lépésben eltér a blokkos adatátvitel és a cikluslopásos:
     \begin{itemize}
         \item blokkos átvitel esetén az átvitel idejére a DMA lefoglalja a buszt, a paraméterek bekerülnek a DMA regisztereibe
         \item cikluslopásos átvitelnél nem a teljes átvitelre foglalja le a buszt, csak bizonyos időtartamokra (olyan ciklusoknál, amikor a CPU nem használja a rendszerbuszt, azaz decode és execute fázisokban - ezek a DMA töréspontok). Ezt kevesebb adat esetén használják.
     \end{itemize}
     \item a DMA megszakítás kérést küld a processzornak (DMA request)
-    \item a CPU egy DMA acknowledge jelzést küld a DMA vezérlőnek
+    \item a CPU egy DMA acknowledge jelzést küld a DMA vezérlőnek, amiben engedélyezi a buszhasználatot
     \item az IO címregiszterbe a DMA betölti az első címet, majd kiteszi a címbuszra
     \item beolvassa a perifériából az információt az IO data regiszterbe
     \item az IO data regiszterből betölti az operatív tárba az adatot
@@ -142,9 +142,39 @@ Műdödési lépései:
 A cikluslopásos végrehajtást ma már nem nagyon használják, mivel a futószalag és a párhuzamos végrehajtás miatt a buszrendszer gyakorlatilag folyamatosan használatban van.
 
 \section{I/O csatorna}
+Az IO csatorna a DMA kiterjesztése lassabb perifériákhoz.
 Típusai:
 \begin{itemize}
     \item szelektor csatorna
     \item multiplexer csatorna
 \end{itemize}
+Ekkor sem hajt végre IO műveleteket a CPU.
+Az utasítások az IO vezérlő számára a memóriában vannak tárolva.
+Itt a processzor nem paraméterezi fel a DMA-t, hanem a memóriába írt programon keresztül specifikálja az adatátvitelt, amit a DMA végrehajt.
 
+\subsection{Szelektor csatorna felépítése}
+Nagyobb sebességű IO eszközökhöz való, egyetlen IO vonallal rendelkezik.
+Ennek oka, hogy egy perifériánál nem kell sokat várni az adat küldésére (kis mennyiség és viszonylag nagy sebesség), így elég egy csatorna is.
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{szelektor}
+    \centering
+    \caption{A szelektor csatorna típusú IO csatorna}
+    \label{fig:szelektor}
+\end{figure}
+Itt egyszerre csak egy egység kommunikálhat.
+
+\subsection{Multiplexer csatorna felépítése}
+Olyan eszközökhöz való, amik lassú adatátvitelre képesek.
+Itt van egy csatorna vezérlő, amire párhuzamosan több IO vezérlő csatlakozhat.
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{multiplex}
+    \centering
+    \caption{A multiplexer csatorna típusú IO csatorna}
+    \label{fig:multiplex}
+\end{figure}
+\subsubsection{Típusai}
+\begin{itemize}
+    \item byte multiplexer - byteonként küldi az adatokat
+    \item blokk multiplexer - blokkonként küldi az adatokat
+\end{itemize}
+A választás az adott eszközöktől függ, cél az átvitel maximalizálása.
